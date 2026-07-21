@@ -25,9 +25,57 @@ vectors = embedding_model.embed_documents(chunks)
 # print("\nFirst Vector (first 10 values):\n")
 # print(vectors[0][:10])
 
-print("\nCheck permanent storage:\n")
-print(vector_db._collection.count())
+# print("\nCheck permanent storage:\n")
+# print(vector_db._collection.count())
 
-vector_db.add_texts(chunks)
+# vector_db.add_texts(chunks)
 
-print("Stored Successfully!")
+# print("Stored Successfully!")
+from src.retriever.document_retriever import retrieve_documents
+
+# query = "What is NDSAP?"
+query = "What is metadata?"
+# What is metadata?
+
+# Who is responsible for implementation?
+
+# What is the objective of NDSAP?
+
+# Which ministry issued the policy?
+
+# Explain version history. //similarity_search_with_score
+
+# results = retrieve_documents(query)
+
+# print("=" * 60)
+# print("QUESTION")
+# print("=" * 60)
+
+# print(query)
+
+# print("\n")
+
+# print("=" * 60)
+# print("TOP RESULTS")
+# print("=" * 60)
+
+# for index, doc in enumerate(results, start=1):
+
+#     print(f"\nResult {index}")
+
+#     print("-" * 60)
+
+#     print(doc.page_content[:400])
+
+#     print()
+
+results = vector_db.similarity_search_with_score(
+    query=query,
+    k=5
+)
+
+for document, score in results:
+
+    print(score)
+
+    print(document.page_content[:200])
