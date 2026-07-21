@@ -1,10 +1,9 @@
-from src.llm_provider import llm
+from src.readers.pdf_reader import read_pdf
 
-print("=" * 50)
-print("Testing Ollama Connection")
-print("=" * 50)
+text = read_pdf("data/NDSAP Implementation Guidelines 2.4.pdf")
 
-response = llm.call("Who are you?")
+print("=" * 60)
+print("PDF PREVIEW")
+print("=" * 60)
 
-print("\nResponse:\n")
-print(response)
+print(text[:1000])
