@@ -1,21 +1,14 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-def split_text(
-    text: str,
-    chunk_size: int = 500,
-    chunk_overlap: int = 100,
-):
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size,
-        chunk_overlap=chunk_overlap,
-        separators=[
-            "\n\n",
-            "\n",
-            ". ",
-            " ",
-            ""
-        ]
-    )
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000,
+    chunk_overlap=200,
+)
 
-    return splitter.split_text(text)
+
+def split_documents(documents):
+    """
+    Split LangChain Documents while preserving metadata.
+    """
+    return text_splitter.split_documents(documents)

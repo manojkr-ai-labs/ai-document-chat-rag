@@ -1,21 +1,21 @@
 from src.readers.document_loader import load_documents
+from src.chunking.text_splitter import split_documents
 
 documents = load_documents()
 
-# print("=" * 60)
-# print("DOCUMENT LOADER TEST")
-# print("=" * 60)
+chunks = split_documents(documents)
 
-# print(f"Total Documents : {len(documents)}")
-# print()
+print("=" * 60)
+print("DOCUMENT CHUNKING TEST")
+print("=" * 60)
 
-# print("Metadata:")
-# print(documents[0].metadata)
+print(f"Original Pages : {len(documents)}")
+print(f"Chunks         : {len(chunks)}")
 
-# print()
+print()
+print("Metadata:")
+print(chunks[0].metadata)
 
-# print("Preview:")
-# print(documents[0].page_content[:300])
-print("Source :", documents[0].metadata["source"])
-print("Page   :", documents[0].metadata["page"])
-print("Pages  :", documents[0].metadata["total_pages"])
+print()
+print("Preview:")
+print(chunks[0].page_content[:300])
