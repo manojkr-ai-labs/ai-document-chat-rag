@@ -1,11 +1,13 @@
 from dotenv import load_dotenv
 import os
 
-# Load variables from the .env file
 load_dotenv()
 
-# Read the model name
-MODEL = os.getenv("MODEL")   
+MODEL = os.getenv("MODEL", "llama3.2")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
 
 BASE_URL = os.getenv("BASE_URL", "http://localhost:11434")
-# BASE_URL = os.getenv("BASE_URL")
+
+CHROMA_PATH = os.getenv("CHROMA_PATH", "storage/chroma")
+
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

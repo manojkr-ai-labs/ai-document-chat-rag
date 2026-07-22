@@ -2,7 +2,7 @@ import time
 from pathlib import Path
 
 from src.services.rag_service import ask_document
-
+from src.utils.logger import logger
 
 DEFAULT_PDF = "data/NDSAP Implementation Guidelines 2.4.pdf"
 
@@ -33,9 +33,9 @@ def load_document():
             f"\n❌ PDF not found:\n{pdf_path}"
         )
 
-    print("\n📄 Loading document...")
-    print("⚡ Preparing AI system...")
-    print("✅ Ready!\n")
+    logger.info("Loading document...")
+    logger.info("Preparing AI system...")
+    logger.info("✅ Ready!")
 
     return pdf_path
 
