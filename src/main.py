@@ -1,11 +1,21 @@
- 
+from src.readers.document_loader import load_documents
 
+documents = load_documents()
 
-from src.utils.file_utils import get_pdf_files
+# print("=" * 60)
+# print("DOCUMENT LOADER TEST")
+# print("=" * 60)
 
-pdf_files = get_pdf_files()
+# print(f"Total Documents : {len(documents)}")
+# print()
 
-print("\nPDF Files Found:\n")
+# print("Metadata:")
+# print(documents[0].metadata)
 
-for pdf in pdf_files:
-    print(pdf.name)
+# print()
+
+# print("Preview:")
+# print(documents[0].page_content[:300])
+print("Source :", documents[0].metadata["source"])
+print("Page   :", documents[0].metadata["page"])
+print("Pages  :", documents[0].metadata["total_pages"])

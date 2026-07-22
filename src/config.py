@@ -9,8 +9,6 @@ EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
 BASE_URL = os.getenv("BASE_URL", "http://localhost:11434")
 
 CHROMA_PATH = os.getenv("CHROMA_PATH", "storage/chroma")
-
-
 DOCUMENTS_PATH = os.getenv("DOCUMENTS_PATH", "documents")
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
