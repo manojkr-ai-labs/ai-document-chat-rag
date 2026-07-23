@@ -19,3 +19,7 @@ LLM Interface
  ┌──────┼────────┐
  │      │        │
 Ollama OpenAI Claude Gemini
+
+
+documents/ → PDFs and data for the RAG application.
+docs/ → Documentation for developers.
