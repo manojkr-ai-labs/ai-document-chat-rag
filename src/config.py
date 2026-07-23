@@ -13,3 +13,6 @@ DOCUMENTS_PATH = os.getenv("DOCUMENTS_PATH", "documents")
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 EMBED_BATCH_SIZE = int(os.getenv("EMBED_BATCH_SIZE", "100"))
+
+
+TOP_K = int(os.getenv("TOP_K", 5))

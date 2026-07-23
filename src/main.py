@@ -1,17 +1,19 @@
-# from src.services.index_manifest import load_manifest
-# from src.services.index_manifest import save_manifest
+from src.retriever.retriever import retrieve_context
 
-# manifest = load_manifest()
+from src.utils.logger import logger
+query = input("Ask: ")
 
-# manifest["Docker.pdf"] = {
-#     "hash": "123456789"
-# }
+results = retrieve_context(query)
 
-# save_manifest(manifest)
+print()
 
-# print("✅ Manifest saved successfully")
-# print(manifest)
-
-from src.services.indexing_service import build_vector_database
-
-build_vector_database()
+for i, (doc, score) in enumerate(results, start=1):
+    logger.info(f"{i}. {doc.metadata['source']} | "f"Page {doc.metadata.get('page')} | " f"Score {score:.4f}")
+    print("=" * 60)
+    print(f"Result {i}")
+    print(f"Score : {score:.4f}")
+    print(f"Source: {doc.metadata['source']}")
+    print()
+    print(doc.page_content[:250])
+    print()
+  
