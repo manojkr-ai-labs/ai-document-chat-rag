@@ -1,16 +1,21 @@
 from src.retriever.document_retriever import retrieve_documents
+from src.prompts.rag_prompt import build_prompt
 from src.agents.rag_agent import ask_llm
+from src.utils.logger import logger
 
 
-def ask_document(question: str):
+def answer_question(question: str) -> str:
+    logger.info("=" * 60)
+    logger.info("Question Received")
+    logger.info(question)
 
-    docs = retrieve_documents(question)
+    documents = retrieve_documents(question)
 
-    context = "\n\n".join(
-        doc.page_content
-        for doc in docs
+    prompt = build_prompt(
+        context=documents,
+        question=question,
     )
 
-    answer = ask_llm(context, question)
+    answer = ask_llm(prompt)
 
     return answer

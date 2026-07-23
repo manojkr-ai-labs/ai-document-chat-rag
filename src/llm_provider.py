@@ -1,7 +1,8 @@
-from crewai import LLM 
+from langchain_ollama import ChatOllama
 from src.config import MODEL, BASE_URL
 
-llm = LLM(
-    model=f"ollama/{MODEL}",
+llm = ChatOllama(
+    model=MODEL,
     base_url=BASE_URL,
+    temperature=0,
 )

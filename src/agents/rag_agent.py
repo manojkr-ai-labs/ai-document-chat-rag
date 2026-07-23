@@ -1,14 +1,24 @@
 from src.llm_provider import llm
-from src.prompts.rag_prompt import RAG_PROMPT
+from src.utils.logger import logger
 
 
-def ask_llm(context: str, question: str):
+def ask_llm(prompt: str) -> str:
+    """
+    Send prompt to the LLM and return the response.
 
-    prompt = RAG_PROMPT.format(
-        context=context,
-        question=question
-    )
+    Args:
+        prompt: Final prompt.
 
-    response = llm.call(prompt)
+    Returns:
+        AI response.
+    """
 
-    return response
+    logger.info("=" * 60)
+    logger.info("Sending prompt to LLM...")
+    logger.info("=" * 60)
+
+    response = llm.invoke(prompt)
+
+    logger.info("LLM response received.")
+
+    return response.content
