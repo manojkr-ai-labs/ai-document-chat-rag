@@ -1,21 +1,17 @@
-from src.readers.document_loader import load_documents
-from src.chunking.text_splitter import split_documents
+# from src.services.index_manifest import load_manifest
+# from src.services.index_manifest import save_manifest
 
-documents = load_documents()
+# manifest = load_manifest()
 
-chunks = split_documents(documents)
+# manifest["Docker.pdf"] = {
+#     "hash": "123456789"
+# }
 
-print("=" * 60)
-print("DOCUMENT CHUNKING TEST")
-print("=" * 60)
+# save_manifest(manifest)
 
-print(f"Original Pages : {len(documents)}")
-print(f"Chunks         : {len(chunks)}")
+# print("✅ Manifest saved successfully")
+# print(manifest)
 
-print()
-print("Metadata:")
-print(chunks[0].metadata)
+from src.services.indexing_service import build_vector_database
 
-print()
-print("Preview:")
-print(chunks[0].page_content[:300])
+build_vector_database()

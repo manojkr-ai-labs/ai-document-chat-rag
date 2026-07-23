@@ -12,3 +12,4 @@ CHROMA_PATH = os.getenv("CHROMA_PATH", "storage/chroma")
 DOCUMENTS_PATH = os.getenv("DOCUMENTS_PATH", "documents")
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+EMBED_BATCH_SIZE = int(os.getenv("EMBED_BATCH_SIZE", "100"))
