@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from src.api.schemas import ChatRequest
 from src.services.rag_service import answer_question
 from fastapi import UploadFile, File
-from src.services.upload_service import save_document
+from src.services.upload_service import save_document, upload_document
 from src.services.indexing_api_service import index_documents
 
 router = APIRouter()
@@ -30,11 +30,15 @@ def chat(request: ChatRequest):
 @router.post("/upload")
 async def upload(file: UploadFile = File(...)):
 
-    content = await file.read()
+    # content = await file.read()
 
-    path = save_document(
-        file.filename,
-        content
+    # path = save_document(
+    #     file.filename,
+    #     content
+    # )
+    result = upload_document(
+    file.filename,
+    await file.read(),
     )
 
     return {
@@ -42,7 +46,7 @@ async def upload(file: UploadFile = File(...)):
         "message": "File uploaded successfully",
         "data": {
             "filename": file.filename,
-            "path": path
+            "path": result
         }
     }
 @router.post("/index")

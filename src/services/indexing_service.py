@@ -15,7 +15,7 @@ from src.readers.document_loader import load_documents
 from src.chunking.text_splitter import split_documents
 from src.vectorstore.chroma_store import vector_db
 from src.config import EMBED_BATCH_SIZE
-
+from pathlib import Path
 def process_pdf(pdf_path, manifest):
     """
     Process one PDF and store it into ChromaDB.
@@ -105,3 +105,17 @@ def build_vector_database():
     logger.info(f"Indexed : {indexed_count}")
     logger.info(f"Skipped : {skipped_count}")
     logger.info(f"Total   : {len(pdf_files)}")
+
+def index_single_document(pdf_path: str | Path) -> bool:
+    """
+    Index a single PDF without rebuilding the whole vector database.
+    """
+
+    pdf_path = Path(pdf_path)
+
+    manifest = load_manifest()
+
+    return process_pdf(
+        pdf_path,
+        manifest,
+    )
