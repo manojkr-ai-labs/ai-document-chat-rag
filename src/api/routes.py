@@ -6,6 +6,7 @@ from src.api.schemas import ChatRequest
 from src.services.rag_service import answer_question
 from fastapi import UploadFile, File
 from src.services.upload_service import save_document
+from src.services.indexing_api_service import index_documents
 
 router = APIRouter()
 
@@ -43,4 +44,13 @@ async def upload(file: UploadFile = File(...)):
             "filename": file.filename,
             "path": path
         }
+    }
+@router.post("/index")
+def index():
+
+    index_documents()
+
+    return {
+        "success": True,
+        "message": "Documents indexed successfully"
     }
