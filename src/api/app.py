@@ -21,6 +21,13 @@ app = FastAPI(
     title="AI Document Chat API",
     description="Enterprise AI Document Chat Backend",
     version="2.0.0",
+      contact={
+        "name": "Manoj Kumar Sah",
+        "email": "...",
+    },
+    license_info={
+        "name": "MIT",
+    },
 )
 
 app.add_exception_handler(

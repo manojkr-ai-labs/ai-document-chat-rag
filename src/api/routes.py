@@ -20,7 +20,18 @@ from src.background.tasks import (
 
 router = APIRouter()
 
-@router.get("/health", response_model=HealthResponse)
+@router.get("/health", response_model=HealthResponse,
+              summary="Health Check",
+              description="Check the health status of the API.",
+              tags=["Health"],
+              responses={
+                200: {"description": "Answer generated successfully"},
+                400: {"description": "Invalid request"},
+                404: {"description": "Document not found"},
+                500: {"description": "Internal server error"},
+               },
+
+    )
 async def health():
     from src.health.service import check_health
     return {
@@ -30,7 +41,18 @@ async def health():
 
 
 @router.post("/chat",
-              response_model=ChatResponse)
+              response_model=ChatResponse,
+             summary="Ask a question",
+             description="Generate an answer using the indexed documents.",
+             tags=["Chat"],
+             responses={
+                             200: {"description": "Answer generated successfully"},
+                             400: {"description": "Invalid request"},
+                             404: {"description": "Document not found"},
+                             500: {"description": "Internal server error"},
+              },
+            
+              )
 def chat(request: ChatRequest):
 
     start = perf_counter()
@@ -46,11 +68,19 @@ def chat(request: ChatRequest):
         "execution_time": execution_time
     }
 
+ 
 
-# @router.post("/upload")
-# async def upload(file: UploadFile = File(...)):
-
-@router.post("/upload", response_model=UploadResponse)
+@router.post("/upload", response_model=UploadResponse,
+      summary="Upload a document",
+      description="Upload and process a document for indexing.",
+      tags=["Upload"],
+      responses={
+                      200: {"description": "Answer generated successfully"},
+                      400: {"description": "Invalid request"},
+                      404: {"description": "Document not found"},
+                      500: {"description": "Internal server error"},
+                     }
+             )
 async def upload(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...), ):
@@ -80,7 +110,17 @@ async def upload(
         },
     }
 
-@router.post("/index", response_model=BaseResponse)
+@router.post("/index", response_model=BaseResponse,
+     summary="Index documents",
+     description="Index the uploaded documents for searching.",
+     tags=["Indexing"],
+    responses={
+                     200: {"description": "Answer generated successfully"},
+                     400: {"description": "Invalid request"},
+                     404: {"description": "Document not found"},
+                     500: {"description": "Internal server error"},
+                    },
+             )
 def index(): 
     index_documents()
 
@@ -89,7 +129,17 @@ def index():
         "message": "Documents indexed successfully"
     }
 
-@router.get("/tasks/{task_id}",  response_model=TaskResponse)
+@router.get("/tasks/{task_id}",  response_model=TaskResponse,
+    summary="Get Task Status",
+    description="Retrieve the status of a specific task.",
+    tags=["Tasks"],
+    responses={
+                    200: {"description": "Answer generated successfully"},
+                    400: {"description": "Invalid request"},
+                    404: {"description": "Document not found"},
+                    500: {"description": "Internal server error"},
+                   },
+            )
 def task_status(task_id: str):
 
     task = get_task(task_id)
