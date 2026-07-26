@@ -64,3 +64,14 @@ async def llm_error_handler(
             },
         },
     )
+async def task_not_found_handler(request, exc):
+    return JSONResponse(
+        status_code=404,
+        content={
+            "success": False,
+            "error": {
+                "code": "TASK_NOT_FOUND",
+                "message": str(exc),
+            },
+        },
+    )

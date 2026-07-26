@@ -8,6 +8,7 @@ from src.exceptions.custom_exceptions import (
     InvalidPDF,
     VectorDatabaseError,
     LLMError,
+    TaskNotFound    
 )
 
 from src.exceptions.handlers import (
@@ -15,6 +16,7 @@ from src.exceptions.handlers import (
     invalid_pdf_handler,
     vector_database_error_handler,
     llm_error_handler,
+    task_not_found_handler
 )
 
 app = FastAPI(
@@ -48,6 +50,10 @@ app.add_exception_handler(
 app.add_exception_handler(
     LLMError,
     llm_error_handler,
+)
+app.add_exception_handler(
+    TaskNotFound,
+    task_not_found_handler,
 )
 app.add_middleware(RequestLoggingMiddleware)
 

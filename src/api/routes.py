@@ -11,7 +11,7 @@ from src.services.indexing_api_service import index_documents
 from fastapi import BackgroundTasks  
 from src.background.tasks import get_task
 from fastapi import HTTPException
-from src.exceptions.custom_exceptions import DocumentNotFound
+from src.exceptions.custom_exceptions import DocumentNotFound, TaskNotFound
 
 from src.background.tasks import (
     create_task,
@@ -143,12 +143,9 @@ def index():
 def task_status(task_id: str):
 
     task = get_task(task_id)
-
+    
     if task is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Task not found",
-        )
+      raise TaskNotFound("Task not found")
 
     return {
         "success": True,
