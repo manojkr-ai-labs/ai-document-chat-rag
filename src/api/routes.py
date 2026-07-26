@@ -1,4 +1,5 @@
 from time import perf_counter
+from unittest import result
 
 from fastapi import APIRouter
 
@@ -19,6 +20,15 @@ from src.background.tasks import (
 
 router = APIRouter()
 
+@router.get("/health")
+async def health():
+    from src.health.service import check_health
+    return {
+            "success": True, 
+            "data": check_health()
+        }
+
+    return 
 
 @router.post("/chat")
 def chat(request: ChatRequest):
