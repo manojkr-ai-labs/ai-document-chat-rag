@@ -10,6 +10,7 @@ from src.services.indexing_api_service import index_documents
 from fastapi import BackgroundTasks  
 from src.background.tasks import get_task
 from fastapi import HTTPException
+from src.exceptions.custom_exceptions import DocumentNotFound
 
 from src.background.tasks import (
     create_task,
@@ -70,8 +71,7 @@ async def upload(
     }
 
 @router.post("/index")
-def index():
-
+def index(): 
     index_documents()
 
     return {
