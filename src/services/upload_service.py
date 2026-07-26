@@ -1,5 +1,5 @@
+ 
 from pathlib import Path
-from src.services.indexing_service import index_single_document
 
 DOCUMENTS_DIR = Path("documents")
 
@@ -17,9 +17,12 @@ def save_document(file_name: str, content: bytes) -> str:
         f.write(content)
 
     return str(file_path)
+
+
 def upload_document(file_name: str, content: bytes):
     """
-    Save uploaded PDF and immediately index it.
+    Save uploaded PDF only.
+    Indexing will happen in the background.
     """
 
     file_path = save_document(
@@ -27,10 +30,7 @@ def upload_document(file_name: str, content: bytes):
         content=content,
     )
 
-    indexed = index_single_document(file_path)
-
     return {
         "filename": file_name,
         "path": file_path,
-        "indexed": indexed,
     }

@@ -7,6 +7,13 @@ from src.services.rag_service import answer_question
 from fastapi import UploadFile, File
 from src.services.upload_service import save_document, upload_document
 from src.services.indexing_api_service import index_documents
+from fastapi import BackgroundTasks  
+
+
+from src.background.tasks import (
+    create_task,
+    process_document,
+)
 
 router = APIRouter()
 
@@ -27,28 +34,40 @@ def chat(request: ChatRequest):
         "execution_time": execution_time
     }
 
+
+# @router.post("/upload")
+# async def upload(file: UploadFile = File(...)):
+
 @router.post("/upload")
-async def upload(file: UploadFile = File(...)):
+async def upload(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...), ):
 
-    # content = await file.read()
+    content = await file.read()
 
-    # path = save_document(
-    #     file.filename,
-    #     content
-    # )
     result = upload_document(
-    file.filename,
-    await file.read(),
+        file.filename,
+        content,
+    )
+
+    task_id = create_task()
+
+    background_tasks.add_task(
+        process_document,
+        task_id,
+        result["path"],
     )
 
     return {
         "success": True,
-        "message": "File uploaded successfully",
+        "message": "Upload started successfully",
         "data": {
-            "filename": file.filename,
-            "path": result
-        }
+            "task_id": task_id,
+            "status": "processing",
+            "filename": result["filename"],
+        },
     }
+
 @router.post("/index")
 def index():
 
