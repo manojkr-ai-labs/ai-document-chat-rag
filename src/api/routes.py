@@ -8,7 +8,8 @@ from fastapi import UploadFile, File
 from src.services.upload_service import save_document, upload_document
 from src.services.indexing_api_service import index_documents
 from fastapi import BackgroundTasks  
-
+from src.background.tasks import get_task
+from fastapi import HTTPException
 
 from src.background.tasks import (
     create_task,
@@ -76,4 +77,23 @@ def index():
     return {
         "success": True,
         "message": "Documents indexed successfully"
+    }
+
+@router.get("/tasks/{task_id}")
+def task_status(task_id: str):
+
+    task = get_task(task_id)
+
+    if task is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found",
+        )
+
+    return {
+        "success": True,
+        "data": {
+            "task_id": task_id,
+            "status": task["status"],
+        },
     }
