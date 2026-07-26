@@ -1,7 +1,8 @@
 import logging
 
-from src.config import LOG_LEVEL
 
+from src.config.settings import LOG_LEVEL
+ 
 
 logging.basicConfig(
     level=LOG_LEVEL,

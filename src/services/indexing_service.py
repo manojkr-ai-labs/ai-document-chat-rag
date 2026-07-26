@@ -4,6 +4,7 @@ from src.utils.logger import logger
 
 from src.utils.file_utils import get_pdf_files
 from src.utils.hash_utils import calculate_file_hash
+from src.config.settings import EMBED_BATCH_SIZE
 
 from src.services.index_manifest import (
     load_manifest,
@@ -13,8 +14,7 @@ from src.services.index_manifest import (
 
 from src.readers.document_loader import load_documents
 from src.chunking.text_splitter import split_documents
-from src.vectorstore.chroma_store import vector_db
-from src.config import EMBED_BATCH_SIZE
+from src.vectorstore.chroma_store import vector_db 
 from pathlib import Path
 def process_pdf(pdf_path, manifest):
     """

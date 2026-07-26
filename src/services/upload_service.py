@@ -1,7 +1,4 @@
- 
-from pathlib import Path
-
-DOCUMENTS_DIR = Path("documents")
+from src.config.settings import DOCUMENTS_DIR
 
 
 def save_document(file_name: str, content: bytes) -> str:

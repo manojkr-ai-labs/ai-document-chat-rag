@@ -1,7 +1,8 @@
 from src.vectorstore.chroma_store import vector_db
+from src.config.settings import TOP_K_RESULTS
 
 
-def retrieve_documents(query: str, k: int = 5):
+def retrieve_documents(query: str, k: int = TOP_K_RESULTS):
     """
     Retrieve the most relevant chunks from ChromaDB.
     """

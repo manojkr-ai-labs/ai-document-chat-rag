@@ -1,7 +1,7 @@
 from pathlib import Path
-from src.config import DOCUMENTS_PATH 
+from src.config.settings import DOCUMENTS_DIR 
 
-def get_pdf_files(data_folder: str = DOCUMENTS_PATH) -> list[Path]:
+def get_pdf_files(data_folder: str = DOCUMENTS_DIR) -> list[Path]:
     """
     Return all PDF files from the data folder.
     """
