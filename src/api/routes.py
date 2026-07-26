@@ -3,7 +3,7 @@ from unittest import result
 
 from fastapi import APIRouter
 
-from src.api.schemas import ChatRequest
+from src.api.schemas import BaseResponse, ChatRequest, ChatResponse, HealthData, HealthResponse, HealthResponse, TaskResponse, UploadResponse
 from src.services.rag_service import answer_question
 from fastapi import UploadFile, File
 from src.services.upload_service import save_document, upload_document
@@ -20,7 +20,7 @@ from src.background.tasks import (
 
 router = APIRouter()
 
-@router.get("/health")
+@router.get("/health", response_model=HealthResponse)
 async def health():
     from src.health.service import check_health
     return {
@@ -28,9 +28,9 @@ async def health():
             "data": check_health()
         }
 
-    return 
 
-@router.post("/chat")
+@router.post("/chat",
+              response_model=ChatResponse)
 def chat(request: ChatRequest):
 
     start = perf_counter()
@@ -50,7 +50,7 @@ def chat(request: ChatRequest):
 # @router.post("/upload")
 # async def upload(file: UploadFile = File(...)):
 
-@router.post("/upload")
+@router.post("/upload", response_model=UploadResponse)
 async def upload(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...), ):
@@ -80,7 +80,7 @@ async def upload(
         },
     }
 
-@router.post("/index")
+@router.post("/index", response_model=BaseResponse)
 def index(): 
     index_documents()
 
@@ -89,7 +89,7 @@ def index():
         "message": "Documents indexed successfully"
     }
 
-@router.get("/tasks/{task_id}")
+@router.get("/tasks/{task_id}",  response_model=TaskResponse)
 def task_status(task_id: str):
 
     task = get_task(task_id)
