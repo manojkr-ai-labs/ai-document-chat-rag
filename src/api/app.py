@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from src.api.routes import router
+from src.middleware.request_logger import RequestLoggingMiddleware
 
 from src.exceptions.custom_exceptions import (
     DocumentNotFound,
@@ -41,5 +42,6 @@ app.add_exception_handler(
     LLMError,
     llm_error_handler,
 )
+app.add_middleware(RequestLoggingMiddleware)
 
 app.include_router(router)
