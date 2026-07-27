@@ -4,7 +4,6 @@ An **enterprise-grade Retrieval-Augmented Generation (RAG)** application that al
 
 The project is built using **FastAPI, LangChain, ChromaDB, Docker, Docker Compose, and GitHub Actions**, following production-oriented software engineering practices.
 
-
 ![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green?logo=fastapi&logoColor=white)
 ![LangChain](https://img.shields.io/badge/LangChain-RAG-success)
@@ -17,12 +16,6 @@ The project is built using **FastAPI, LangChain, ChromaDB, Docker, Docker Compos
 
 ![Release](https://img.shields.io/badge/Release-v2.15-blue)
 ![License](https://img.shields.io/badge/License-MIT-orange)
- 
-![Repo Size](https://img.shields.io/github/repo-size/manojkr-ai-labs/ai-document-chat-rag)
-
-![Last Commit](https://img.shields.io/github/last-commit/manojkr-ai-labs/ai-document-chat-rag)
-
-![GitHub Stars](https://img.shields.io/github/stars/manojkr-ai-labs/ai-document-chat-rag?style=social)
 
 ---
 
