@@ -17,10 +17,12 @@ The project is built using **FastAPI, LangChain, ChromaDB, Docker, Docker Compos
 
 ![Release](https://img.shields.io/badge/Release-v2.15-blue)
 ![License](https://img.shields.io/badge/License-MIT-orange)
+ 
 ![Repo Size](https://img.shields.io/github/repo-size/manojkr-ai-labs/ai-document-chat-rag)
-![Last Commit](https://img.shields.io/github/last-commit/manojkr-ai-labs/ai-document-chat-rag)
-![GitHub stars](https://img.shields.io/github/stars/manojkr-ai-labs/ai-document-chat-rag?style=social)
 
+![Last Commit](https://img.shields.io/github/last-commit/manojkr-ai-labs/ai-document-chat-rag)
+
+![GitHub Stars](https://img.shields.io/github/stars/manojkr-ai-labs/ai-document-chat-rag?style=social)
 
 ---
 
