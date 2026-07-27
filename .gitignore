@@ -106,3 +106,9 @@ reports/
 # Uploaded Files (Optional)
 # ======================================
 uploads/
+
+
+
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
