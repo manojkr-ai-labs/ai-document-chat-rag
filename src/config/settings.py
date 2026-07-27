@@ -1,4 +1,6 @@
 
+import http
+
 from dotenv import load_dotenv
 import os
 
@@ -16,7 +18,11 @@ REPORT_DIR = BASE_DIR / "output" / "reports"
 SCREENSHOT_DIR = BASE_DIR / "screenshots"
 
 
-BASE_URL = os.getenv("BASE_URL", "http://localhost:11434")
+# BASE_URL = os.getenv("BASE_URL", "http://localhost:11434")
+
+BASE_URL = os.getenv("BASE_URL", "http://host.docker.internal:11434")
+
+ 
 
 
 LLM_MODEL = "llama3.2"

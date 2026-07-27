@@ -43,3 +43,11 @@ Future Features
 ## Future Improvements
 
 ## Learning Outcomes
+
+
+Project architecture
+Docker commands
+API endpoints
+Test commands
+GitHub Actions badge
+Coverage badge
