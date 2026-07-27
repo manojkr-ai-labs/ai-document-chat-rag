@@ -1,3 +1,24 @@
+flowchart LR
+
+User --> FastAPI
+
+FastAPI --> ChatAPI
+FastAPI --> UploadAPI
+FastAPI --> IndexAPI
+
+ChatAPI --> RAG
+
+RAG --> ChromaDB
+RAG --> Ollama
+
+UploadAPI --> Documents
+
+Documents --> Chunking
+
+Chunking --> Embeddings
+
+Embeddings --> ChromaDB
+
 # ADR-001: RAG Architecture
 
 ## Status
