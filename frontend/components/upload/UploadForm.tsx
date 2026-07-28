@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
+import { useUpload } from "@/hooks/useUpload";
+
 import UploadDropzone from "./UploadDropzone";
 import UploadProgress from "./UploadProgress";
 import UploadResult from "./UploadResult";
@@ -11,42 +13,12 @@ import UploadResult from "./UploadResult";
 export default function UploadForm() {
   const [file, setFile] = useState<File | null>(null);
 
-  const [progress, setProgress] = useState(0);
+  const uploadMutation = useUpload();
 
-  const [success, setSuccess] = useState(false);
+  const handleUpload = () => {
+    if (!file) return;
 
-  const [message, setMessage] = useState("");
-
-  const [uploading, setUploading] = useState(false);
-
-  const handleUpload = async () => {
-    if (!file) {
-      setMessage("Please select a PDF.");
-      setSuccess(false);
-      return;
-    }
-
-    setUploading(true);
-
-    setProgress(0);
-
-    const timer = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(timer);
-
-          setUploading(false);
-
-          setSuccess(true);
-
-          setMessage(`${file.name} uploaded successfully.`);
-
-          return 100;
-        }
-
-        return prev + 10;
-      });
-    }, 200);
+    uploadMutation.mutate(file);
   };
 
   return (
@@ -59,19 +31,31 @@ export default function UploadForm() {
       <Button
         className="w-full"
         onClick={handleUpload}
-        disabled={uploading}
+        disabled={!file || uploadMutation.isPending}
       >
-        {uploading ? "Uploading..." : "Upload PDF"}
+        {uploadMutation.isPending
+          ? "Uploading..."
+          : "Upload PDF"}
       </Button>
 
-      {uploading && (
-        <UploadProgress progress={progress} />
+      {uploadMutation.isPending && (
+        <UploadProgress progress={50} />
       )}
 
-      {message && (
+      {uploadMutation.isSuccess && (
         <UploadResult
-          success={success}
-          message={message}
+          success={true}
+          message={uploadMutation.data.message}
+        />
+      )}
+
+      {uploadMutation.isError && (
+        <UploadResult
+          success={false}
+          message={
+            uploadMutation.error?.message ??
+            "Upload failed. Please try again."
+          }
         />
       )}
     </div>

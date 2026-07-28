@@ -84,7 +84,7 @@ def chat(request: ChatRequest):
 async def upload(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...), ):
-
+    print("========== UPLOAD HIT ==========")
     content = await file.read()
 
     result = upload_document(
