@@ -4,21 +4,31 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
-import { useUpload } from "@/hooks/useUpload";
+import  UploadDropzone  from "./UploadDropzone";
+import  UploadProgress  from "./UploadProgress";
+import UploadResult  from "./UploadResult";
 
-import UploadDropzone from "./UploadDropzone";
-import UploadProgress from "./UploadProgress";
-import UploadResult from "./UploadResult";
+import { useUpload } from "@/hooks/useUpload";
+import { useTaskStatus } from "@/hooks/useTaskStatus";
 
 export default function UploadForm() {
   const [file, setFile] = useState<File | null>(null);
+  const [taskId, setTaskId] = useState<string | null>(null);
 
   const uploadMutation = useUpload();
 
-  const handleUpload = () => {
+  const { data: taskStatus } = useTaskStatus(taskId);
+
+  const handleUpload = async () => {
     if (!file) return;
 
-    uploadMutation.mutate(file);
+    try {
+      const response = await uploadMutation.mutateAsync(file);
+
+      setTaskId(response.data.task_id);
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
   };
 
   return (
@@ -30,22 +40,28 @@ export default function UploadForm() {
 
       <Button
         className="w-full"
-        onClick={handleUpload}
         disabled={!file || uploadMutation.isPending}
+        onClick={handleUpload}
       >
         {uploadMutation.isPending
           ? "Uploading..."
           : "Upload PDF"}
       </Button>
 
-      {uploadMutation.isPending && (
-        <UploadProgress progress={50} />
+      {taskId && (
+        <UploadProgress
+          status={taskStatus?.data.status ?? "processing"}
+        />
       )}
 
       {uploadMutation.isSuccess && (
         <UploadResult
           success={true}
-          message={uploadMutation.data.message}
+          message={
+            taskStatus?.data.status === "completed"
+              ? "Document indexed successfully."
+              : "Upload started successfully."
+          }
         />
       )}
 
@@ -54,7 +70,7 @@ export default function UploadForm() {
           success={false}
           message={
             uploadMutation.error?.message ??
-            "Upload failed. Please try again."
+            "Upload failed."
           }
         />
       )}

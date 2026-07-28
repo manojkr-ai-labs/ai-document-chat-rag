@@ -30,3 +30,10 @@ export async function getUploadStatus(taskId: string) {
 
   return response.data;
 }
+export async function getTaskStatus(taskId: string) {
+  const response = await api.get<UploadStatusResponse>(
+    `/tasks/${taskId}`
+  );
+
+  return response.data;
+}

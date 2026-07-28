@@ -1,7 +1,12 @@
+ 
 export interface UploadResponse {
   success: boolean;
   message: string;
-  task_id: string;
+  data: {
+    task_id: string;
+    status: string;
+    filename: string;
+  };
 }
 
 export interface UploadStatus {
@@ -14,6 +19,7 @@ export interface UploadStatusResponse {
   message: string;
   data: UploadStatus;
 }
+
 
 export interface UploadRequest {
   file: File;
