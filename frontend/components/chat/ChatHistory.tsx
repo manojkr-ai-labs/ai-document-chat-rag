@@ -1,9 +1,12 @@
 import ChatMessage from "./ChatMessage";
-
+import { Citation } from "@/types/chat";
+ 
 export interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  timestamp: Date;
+  citations?: Citation[];
 }
 
 interface ChatHistoryProps {
@@ -31,10 +34,12 @@ export default function ChatHistory({
   return (
     <div className="space-y-4">
       {messages.map((message) => (
-        <ChatMessage
-          key={message.id}
-          role={message.role}
-          content={message.content}
+      <ChatMessage
+        key={message.id}
+        role={message.role}
+        content={message.content}
+        timestamp={message.timestamp}
+        citations={message.citations}
         />
       ))}
     </div>

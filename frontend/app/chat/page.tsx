@@ -1,6 +1,5 @@
 "use client";
-
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import ChatHistory, {
   type Message,
@@ -8,18 +7,27 @@ import ChatHistory, {
 import ChatInput from "@/components/chat/ChatInput";
 
 import { useChat } from "@/hooks/useChat";
+import ThinkingIndicator from "@/components/chat/ThinkingIndicator";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
-
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMutation = useChat();
 
+  useEffect(() => {
+  messagesEndRef.current?.scrollIntoView({
+    behavior: "smooth",
+  });
+}, [messages]);
+
   const handleSend = async (question: string) => {
-    const userMessage: Message = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: question,
-    };
+   
+      const userMessage: Message = {
+        id: crypto.randomUUID(),
+        role: "user",
+        content: question,
+        timestamp: new Date(),
+        };
 
     setMessages((prev) => [...prev, userMessage]);
 
@@ -29,18 +37,31 @@ export default function ChatPage() {
       );
 
       const assistantMessage: Message = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: response.data.answer,
-      };
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: response.data.answer,
+            timestamp: new Date(),
+            citations: response.data.citations
+            };
 
       setMessages((prev) => [
         ...prev,
         assistantMessage,
       ]);
-    } catch (error) {
-      console.error(error);
-    }
+    }  catch (error) {
+        console.error(error);
+
+        const errorMessage: Message = {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content:
+            `❌ Sorry, I couldn't generate an answer.\n Please try again.`,
+            timestamp: new Date(),
+        };
+
+        setMessages((prev) => [...prev, errorMessage]);
+        }
+     
   };
 
   return (
@@ -57,12 +78,13 @@ export default function ChatPage() {
 
       <div className="flex-1 overflow-y-auto rounded-xl border bg-slate-50 p-6">
         <ChatHistory messages={messages} />
+         <div ref={messagesEndRef} />
       </div>
-
-      <ChatInput
+      {chatMutation.isPending && <ThinkingIndicator />}
+        <ChatInput
         onSend={handleSend}
         isLoading={chatMutation.isPending}
-      />
+        /> 
     </div>
   );
 }
