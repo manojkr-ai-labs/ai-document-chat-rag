@@ -13,6 +13,9 @@ from src.background.tasks import get_task
 from fastapi import HTTPException
 from src.exceptions.custom_exceptions import DocumentNotFound, TaskNotFound
 
+from fastapi.responses import StreamingResponse
+from src.services.rag_stream_service import stream_answer
+
 from src.background.tasks import (
     create_task,
     process_document,
@@ -67,8 +70,23 @@ def chat(request: ChatRequest):
         "data": result,
         "execution_time": execution_time
     }
-
  
+
+@router.post("/chat/stream",
+    summary="Stream an answer",
+    description="Generate an answer using the indexed documents and stream it token by token.",
+    tags=["Chat"],
+)
+def chat_stream(request: ChatRequest):
+
+    def generate():
+        for chunk in stream_answer(request.question):
+            yield chunk
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/plain",
+    ) 
 
 @router.post("/upload", response_model=UploadResponse,
       summary="Upload a document",

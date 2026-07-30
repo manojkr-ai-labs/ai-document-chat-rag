@@ -128,11 +128,11 @@ export default function ChatPage() {
          <div ref={messagesEndRef} />
       </div> 
       {isStreaming && <ThinkingIndicator />}
-       <ChatInput
-        onSend={handleSend}
-        onStop={handleStop}
-        isLoading={isStreaming}
-      />
+    <ChatInput
+      onSend={handleSend}
+      onStop={handleStop}
+      isStreaming={isStreaming}
+    />
     </div>
   );
 }
