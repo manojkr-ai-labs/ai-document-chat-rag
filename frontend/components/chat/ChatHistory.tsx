@@ -11,10 +11,12 @@ export interface Message {
 
 interface ChatHistoryProps {
   messages: Message[];
+  isStreaming: boolean;
 }
 
 export default function ChatHistory({
   messages,
+  isStreaming
 }: ChatHistoryProps) {
   if (messages.length === 0) {
     return (
@@ -30,16 +32,24 @@ export default function ChatHistory({
       </div>
     );
   }
+  const lastAssistantIndex = messages
+  .map((m) => m.role)
+  .lastIndexOf("assistant");
 
   return (
     <div className="space-y-4">
-      {messages.map((message) => (
+      {messages.map((message, index) => (
       <ChatMessage
         key={message.id}
         role={message.role}
         content={message.content}
         timestamp={message.timestamp}
         citations={message.citations}
+         isStreaming={
+              isStreaming &&
+              index === lastAssistantIndex &&
+              message.role === "assistant"
+            }
         />
       ))}
     </div>

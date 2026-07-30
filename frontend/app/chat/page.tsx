@@ -6,13 +6,16 @@ import ChatHistory, {
 } from "@/components/chat/ChatHistory";
 import ChatInput from "@/components/chat/ChatInput";
 
-import { useChat } from "@/hooks/useChat";
+// import { useChat } from "@/hooks/useChat";
 import ThinkingIndicator from "@/components/chat/ThinkingIndicator";
+import { streamChat } from "@/services/chatStream";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatMutation = useChat();
+  const [isStreaming, setIsStreaming] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  // const chatMutation = useChat();
 
   useEffect(() => {
   messagesEndRef.current?.scrollIntoView({
@@ -21,48 +24,90 @@ export default function ChatPage() {
 }, [messages]);
 
   const handleSend = async (question: string) => {
-   
+      // 1. User message
       const userMessage: Message = {
         id: crypto.randomUUID(),
         role: "user",
         content: question,
         timestamp: new Date(),
-        };
+      };
 
-    setMessages((prev) => [...prev, userMessage]);
+      setMessages((prev) => [...prev, userMessage]);
 
-    try {
-      const response = await chatMutation.mutateAsync(
-        question
-      );
-
-      const assistantMessage: Message = {
-            id: crypto.randomUUID(),
-            role: "assistant",
-            content: response.data.answer,
-            timestamp: new Date(),
-            citations: response.data.citations
-            };
+      // 2. Create an empty assistant message
+      const assistantId = crypto.randomUUID();
 
       setMessages((prev) => [
         ...prev,
-        assistantMessage,
+        {
+          id: assistantId,
+          role: "assistant",
+          content: "",
+          timestamp: new Date(),
+        },
       ]);
-    }  catch (error) {
-        console.error(error);
+      setIsStreaming(true);
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
 
-        const errorMessage: Message = {
-            id: crypto.randomUUID(),
-            role: "assistant",
-            content:
-            `❌ Sorry, I couldn't generate an answer.\n Please try again.`,
-            timestamp: new Date(),
-        };
+      try {
+        // 3. Stream response
+       await streamChat(
+              question,
+              (chunk) => {
+                console.log("Chunk:", chunk);
+                setMessages((prev) => {
+                              const updated = prev.map((message) =>
+                                message.id === assistantId
+                                  ? {
+                                      ...message,
+                                      content: message.content + chunk,
+                                    }
+                                  : message
+                              );
 
-        setMessages((prev) => [...prev, errorMessage]);
-        }
-     
+                              const assistant = updated.find(
+                                (m) => m.id === assistantId
+                              );
+
+                              console.log("Assistant State:", assistant?.content);
+
+                              return updated;
+                            });
+              },
+              controller.signal
+            );
+      }  catch (error) {
+            if (error instanceof DOMException && error.name === "AbortError") {
+              console.log("Streaming cancelled by user.");
+              return;
+            }
+
+            console.error(error);
+
+            setMessages((prev) =>
+              prev.filter((message) => message.id !== assistantId)
+            );
+            
+
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: crypto.randomUUID(),
+                role: "assistant",
+                content: "❌ Sorry, I couldn't generate an answer.\nPlease try again.",
+                timestamp: new Date(),
+              },
+            ]);
+          }     
+     finally {
+        abortControllerRef.current = null;
+        setIsStreaming(false);
+      }
   };
+  const handleStop = () => {
+      abortControllerRef.current?.abort();
+    };
 
   return (
     <div className="mx-auto flex h-[calc(100vh-100px)] max-w-5xl flex-col gap-6 p-6">
@@ -77,14 +122,17 @@ export default function ChatPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto rounded-xl border bg-slate-50 p-6">
-        <ChatHistory messages={messages} />
+        <ChatHistory messages={messages} 
+         isStreaming={isStreaming}
+        />
          <div ref={messagesEndRef} />
-      </div>
-      {chatMutation.isPending && <ThinkingIndicator />}
-        <ChatInput
+      </div> 
+      {isStreaming && <ThinkingIndicator />}
+       <ChatInput
         onSend={handleSend}
-        isLoading={chatMutation.isPending}
-        /> 
+        onStop={handleStop}
+        isLoading={isStreaming}
+      />
     </div>
   );
 }

@@ -7,13 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 interface ChatInputProps {
-  onSend: (question: string) => void;
-  isLoading: boolean;
+   onSend: (question: string) => void;
+   onStop: () => void;
+   isLoading: boolean;
 }
 
 export default function ChatInput({
-  onSend,
-  isLoading,
+   onSend,
+   onStop,
+   isLoading,
 }: ChatInputProps) {
   const [question, setQuestion] = useState("");
 
@@ -39,15 +41,20 @@ export default function ChatInput({
       />
 
       <Button
-        onClick={handleSubmit}
-        disabled={isLoading}
-      >
-        <Send className="h-4 w-4" />
-
-        <span className="ml-2">
-          {isLoading ? "Thinking..." : "Send"}
-        </span>
-      </Button>
+          onClick={isLoading ? onStop : handleSubmit}
+        >
+          {isLoading ? (
+            <>
+              <span className="text-lg">■</span>
+              <span className="ml-2">Stop</span>
+            </>
+          ) : (
+            <>
+              <Send className="h-4 w-4" />
+              <span className="ml-2">Send</span>
+            </>
+          )}
+        </Button>
     </div>
   );
 }

@@ -12,6 +12,7 @@ interface ChatMessageProps {
   content: string;
   timestamp: Date;
   citations?: Citation[];
+  isStreaming?: boolean;
 }
 
 export default function ChatMessage({
@@ -19,63 +20,72 @@ export default function ChatMessage({
   content,
   timestamp,
   citations,
+   isStreaming = false,
 }: ChatMessageProps) {
   const isUser = role === "user";
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-      <div
-        className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${
-          isUser
-            ? "bg-blue-600 text-white"
-            : "border bg-white text-gray-900"
-        }`}
-      >
-        {isUser ? (
-          <p className="whitespace-pre-wrap text-sm">{content}</p>
-        ) : (
-          <div className="prose prose-sm max-w-none">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                code({ inline, className, children, ...props }) {
-                  const match = /language-(\w+)/.exec(className || "");
-                  const code = String(children).replace(/\n$/, "");
+     <div
+            className={`rounded-2xl px-4 py-3 shadow-sm ${
+              isUser
+                ? "ml-auto max-w-[75%] bg-blue-600 text-white"
+                : "mr-auto w-full max-w-[75%] border bg-white text-gray-900"
+            }`}
+          >
+       {isUser ? (
+              <p className="whitespace-pre-wrap break-words leading-7">{content}</p>
+            ) : (
+              <>
+                {isStreaming ? (
+                  <div className="whitespace-pre-wrap break-words leading-7">
+                    {content}
+                    <span className="animate-pulse font-bold">▌</span>
+                  </div>
+                ) : (
+                  <div className="prose prose-sm max-w-none">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        code({ className, children, ...props }) {
+                          const match = /language-(\w+)/.exec(className || "");
+                          const code = String(children).replace(/\n$/, "");
 
-                  if (!inline && match) {
-                    return (
-                      <div className="relative">
-                        <CopyCodeButton code={code} />
+                          if (match) {
+                            return (
+                              <div className="relative">
+                                <CopyCodeButton code={code} />
+                                <SyntaxHighlighter
+                                  style={oneDark}
+                                  language={match[1]}
+                                  PreTag="div"
+                                  {...props}
+                                >
+                                  {code}
+                                </SyntaxHighlighter>
+                              </div>
+                            );
+                          }
 
-                        <SyntaxHighlighter
-                          style={oneDark}
-                          language={match[1]}
-                          PreTag="div"
-                          {...props}
-                        >
-                          {code}
-                        </SyntaxHighlighter>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <code
-                      className="rounded bg-slate-200 px-1 py-0.5"
-                      {...props}
+                          return (
+                            <code
+                              className="rounded bg-slate-200 px-1 py-0.5"
+                              {...props}
+                            >
+                              {children}
+                            </code>
+                          );
+                        },
+                      }}
                     >
-                      {children}
-                    </code>
-                  );
-                },
-              }}
-            >
-              {content}
-            </ReactMarkdown>
+                      {content}
+                    </ReactMarkdown>
 
-            <CitationList citations={citations} />
-          </div>
-        )}
+                    <CitationList citations={citations} />
+                  </div>
+                )}
+              </>
+            )}
 
         <p
           className={`mt-2 text-xs ${
