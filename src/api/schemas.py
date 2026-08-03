@@ -163,3 +163,10 @@ class HealthData(BaseModel):
 
 class HealthResponse(BaseResponse):
     data: HealthData
+
+class ConversationCreateRequest(BaseModel):
+    title: str = "New Chat"
+
+
+class ConversationRenameRequest(BaseModel):
+    title: str    

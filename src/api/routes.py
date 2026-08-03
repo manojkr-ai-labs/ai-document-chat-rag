@@ -15,10 +15,19 @@ from src.exceptions.custom_exceptions import DocumentNotFound, TaskNotFound
 
 from fastapi.responses import StreamingResponse
 from src.services.rag_stream_service import stream_answer
+from sqlalchemy.orm import Session
+from fastapi import Depends
+
+from src.database.database import get_db
+from src.services.conversation_service import ConversationService
 
 from src.background.tasks import (
     create_task,
     process_document,
+)
+from src.api.schemas import (
+    ConversationCreateRequest,
+    ConversationRenameRequest,
 )
 
 router = APIRouter()
@@ -171,4 +180,132 @@ def task_status(task_id: str):
             "task_id": task_id,
             "status": task["status"],
         },
+    }
+
+
+# permisted chat
+@router.get(
+    "/conversations",
+    summary="List Conversations",
+    tags=["Conversations"],
+)
+def list_conversations(
+    db: Session = Depends(get_db),
+):
+    service = ConversationService(db)
+    return {
+            "success": True,
+            "message": "All conversations retrieved successfully",
+            "data": service.list_conversations()
+        } 
+
+@router.get(
+    "/conversations/{conversation_id}",
+    summary="Get Conversation",
+    tags=["Conversations"],
+)
+def get_conversation(
+    conversation_id: str,
+    db: Session = Depends(get_db),
+):
+    service = ConversationService(db)
+
+    conversation = service.get_conversation(conversation_id)
+
+    if conversation is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Conversation not found",
+        )
+
+    return {
+        "success": True,
+        "data": conversation,
+    }
+
+@router.post(
+    "/conversations",
+    summary="Create Conversation",
+    tags=["Conversations"],
+)
+def create_conversation(
+    request: ConversationCreateRequest,
+    db: Session = Depends(get_db),
+):
+    service = ConversationService(db)
+
+    conversation = service.create_conversation(
+        request.title,
+    )
+
+    return {
+        "success": True,
+        "message": "Conversation created successfully",
+        "data": conversation,
+    }
+
+def rename_conversation(
+    self,
+    conversation_id: str,
+    title: str,
+):
+    conversation = self.get_conversation(conversation_id)
+
+    if conversation is None:
+        return None
+
+    return self.conversation_repo.rename(
+        conversation,
+        title,
+    )
+
+@router.patch("/conversations/{conversation_id}")
+def rename_conversation(
+    conversation_id: str,
+    request: ConversationRenameRequest,
+    db: Session = Depends(get_db),
+):
+    service = ConversationService(db)
+
+    conversation = service.rename_conversation(
+        conversation_id,
+        request.title,
+    )
+
+    if conversation is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Conversation not found",
+        )
+
+    return {
+        "success": True,
+        "data": conversation,
+    }
+
+
+@router.delete(
+    "/conversations/{conversation_id}",
+    summary="Delete Conversation",
+    tags=["Conversations"],
+)
+def delete_conversation(
+    conversation_id: str,
+    db: Session = Depends(get_db),
+):
+    service = ConversationService(db)
+
+    deleted = service.delete_conversation(
+        conversation_id,
+    )
+
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail="Conversation not found",
+        )
+
+    return {
+        "success": True,
+        "message": "Conversation deleted successfully",
     }

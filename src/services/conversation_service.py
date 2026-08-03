@@ -34,6 +34,21 @@ class ConversationService:
     def list_conversations(self) -> list[Conversation]:
      return self.conversation_repo.list_all()
 
+    def rename_conversation(
+            self,
+            conversation_id: str,
+            title: str,
+        ):
+     conversation = self.get_conversation(conversation_id)
+
+     if conversation is None:
+        return None
+
+     return self.conversation_repo.rename(
+        conversation,
+        title,
+     )
+
     def delete_conversation(
     self,
     conversation_id: str,

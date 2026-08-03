@@ -57,3 +57,16 @@ class ConversationRepository:
       self.db.refresh(conversation)
 
       return conversation 
+    def rename(
+    self,
+    conversation: Conversation,
+    new_title: str,
+) -> Conversation:
+
+     conversation.title = new_title
+     conversation.updated_at = datetime.utcnow()
+
+     self.db.commit()
+     self.db.refresh(conversation)
+
+     return conversation
