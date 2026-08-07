@@ -20,6 +20,7 @@ from fastapi import Depends
 
 from src.database.database import get_db
 from src.services.conversation_service import ConversationService
+from src.services.chat_service import ChatService
 
 from src.background.tasks import (
     create_task,
@@ -52,34 +53,32 @@ async def health():
         }
 
 
-@router.post("/chat",
-              response_model=ChatResponse,
-             summary="Ask a question",
-             description="Generate an answer using the indexed documents.",
-             tags=["Chat"],
-             responses={
-                             200: {"description": "Answer generated successfully"},
-                             400: {"description": "Invalid request"},
-                             404: {"description": "Document not found"},
-                             500: {"description": "Internal server error"},
-              },
-            
-              )
-def chat(request: ChatRequest):
+@router.post("/chat")
+def chat(
+    request: ChatRequest,
+    db: Session = Depends(get_db),
+):
 
     start = perf_counter()
 
-    result = answer_question(request.question)
+    service = ChatService(db)
 
-    execution_time = round(perf_counter() - start, 2)
+    result = service.chat(
+        question=request.question,
+        conversation_id=request.conversation_id,
+    )
+
+    execution_time = round(
+        perf_counter() - start,
+        2,
+    )
 
     return {
         "success": True,
         "message": "Answer generated successfully",
         "data": result,
-        "execution_time": execution_time
+        "execution_time": execution_time,
     }
- 
 
 @router.post("/chat/stream",
     summary="Stream an answer",
@@ -209,17 +208,20 @@ def get_conversation(
     db: Session = Depends(get_db),
 ):
     service = ConversationService(db)
-
-    conversation = service.get_conversation(conversation_id)
+ 
+    conversation = service.get_conversation_with_messages(
+    conversation_id
+)
 
     if conversation is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Conversation not found",
-        )
+     raise HTTPException(
+        status_code=404,
+        detail="Conversation not found",
+    )
 
     return {
         "success": True,
+        "message": "Conversation retrieved successfully",
         "data": conversation,
     }
 
@@ -282,7 +284,6 @@ def rename_conversation(
         "success": True,
         "data": conversation,
     }
-
 
 @router.delete(
     "/conversations/{conversation_id}",

@@ -18,10 +18,22 @@ class MessageRepository:
      """
 
      self.db.add(message)
+    #  self.db.commit()
+    #  self.db.refresh(message)
+
+    #  return message    
+     print("=" * 50)
+     print("Saving message")
+     print("Role:", message.role)
+     print("Conversation:", message.conversation_id)
+
+     self.db.add(message)
      self.db.commit()
      self.db.refresh(message)
 
-     return message    
+     print("Saved message:", message.id)
+     print("=" * 50)
+     return message
 
     def list_by_conversation(
     self,

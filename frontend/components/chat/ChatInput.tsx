@@ -7,12 +7,14 @@ interface ChatInputProps {
   onSend: (message: string) => void;
   onStop: () => void;
   isStreaming: boolean;
+  disabled?: boolean;
 }
 
 export default function ChatInput({
   onSend,
   onStop,
   isStreaming,
+  disabled = false,
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
     const {
@@ -47,7 +49,7 @@ const handleChange = (
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
 
-      if (!isStreaming) {
+      if (!isStreaming && !disabled) {
         handleSubmit();
       }
     }
@@ -62,7 +64,7 @@ const handleChange = (
           placeholder="Ask a question about your documents..."
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          disabled={isStreaming}
+          disabled={isStreaming || disabled}
           className="
             flex-1
             min-w-0
@@ -112,7 +114,7 @@ const handleChange = (
       ) : (
         <button
           onClick={handleSubmit}
-          disabled={!message.trim()}
+          disabled={disabled || !message.trim()}
           className="
             flex
              shrink-0

@@ -1,4 +1,5 @@
-from typing import Optional
+from typing import Any, Optional
+
 from sqlalchemy.orm import Session
 
 from src.repositories.conversation_repository import ConversationRepository
@@ -6,67 +7,142 @@ from src.repositories.message_repository import MessageRepository
 from src.models.conversation import Conversation
 
 
+PLACEHOLDER_TITLES = {"New Chat", "string", ""}
+
+
+def title_from_question(question: str, max_len: int = 60) -> str:
+    cleaned = " ".join(question.strip().split())
+    if not cleaned:
+        return "New Chat"
+    if len(cleaned) > max_len:
+        return f"{cleaned[: max_len - 1]}…"
+    return cleaned
+
+
 class ConversationService:
 
     def __init__(self, db: Session):
         self.db = db
-
         self.conversation_repo = ConversationRepository(db)
         self.message_repo = MessageRepository(db)
 
     def create_conversation(
-    self,
-    title: str = "New Chat",
-  ) -> Conversation:
-     """
-     Create a new conversation.
-     """
+        self,
+        title: str = "New Chat",
+    ) -> dict[str, Any]:
+        conversation = self.conversation_repo.create(title)
+        return self._serialize_conversation(conversation, messages=[])
 
-     return self.conversation_repo.create(title)
+    def get_conversation(
+        self, conversation_id: str
+    ) -> Optional[Conversation]:
+        return self.conversation_repo.get(conversation_id)
 
-    def get_conversation(self, conversation_id: str)-> Optional[Conversation]:
+    def list_conversations(self) -> list[dict[str, Any]]:
         """
-        Get a conversation by ID.
+        Return conversations as plain dicts for the sidebar.
+        Uses the first user message as the display title when the
+        stored title is still a placeholder.
         """
-    
-        return self.conversation_repo.get(conversation_id) 
-    
-    def list_conversations(self) -> list[Conversation]:
-     return self.conversation_repo.list_all()
+        conversations = self.conversation_repo.list_all()
+        result: list[dict[str, Any]] = []
+
+        for conversation in conversations:
+            messages = self.message_repo.list_by_conversation(
+                conversation.id
+            )
+            # Skip empty chats so the sidebar only shows real history
+            if not messages:
+                continue
+
+            result.append(
+                self._serialize_conversation(
+                    conversation,
+                    messages=messages,
+                )
+            )
+
+        return result
+
+    def get_conversation_with_messages(
+        self,
+        conversation_id: str,
+    ) -> Optional[dict[str, Any]]:
+        conversation = self.get_conversation(conversation_id)
+
+        if conversation is None:
+            return None
+
+        messages = self.message_repo.list_by_conversation(
+            conversation_id
+        )
+
+        return self._serialize_conversation(
+            conversation,
+            messages=messages,
+            include_messages=True,
+        )
 
     def rename_conversation(
-            self,
-            conversation_id: str,
-            title: str,
-        ):
-     conversation = self.get_conversation(conversation_id)
+        self,
+        conversation_id: str,
+        title: str,
+    ) -> Optional[dict[str, Any]]:
+        conversation = self.get_conversation(conversation_id)
 
-     if conversation is None:
-        return None
+        if conversation is None:
+            return None
 
-     return self.conversation_repo.rename(
-        conversation,
-        title,
-     )
+        updated = self.conversation_repo.rename(
+            conversation,
+            title,
+        )
+        return self._serialize_conversation(updated, messages=[])
 
-    def delete_conversation(
-    self,
-    conversation_id: str,
-) -> bool:
+    def delete_conversation(self, conversation_id: str) -> bool:
+        conversation = self.get_conversation(conversation_id)
 
-     """
-    Delete a conversation.
+        if conversation is None:
+            return False
 
-    Returns:
-        True if deleted.
-        False if conversation does not exist.
-    """
+        self.conversation_repo.delete(conversation)
+        return True
 
-     conversation = self.get_conversation(conversation_id)
+    def _serialize_conversation(
+        self,
+        conversation: Conversation,
+        messages: list,
+        include_messages: bool = False,
+    ) -> dict[str, Any]:
+        first_user = next(
+            (m for m in messages if m.role == "user"),
+            None,
+        )
+        preview = first_user.content if first_user else None
 
-     if conversation is None:
-        return False
+        title = conversation.title or "New Chat"
+        if title in PLACEHOLDER_TITLES and preview:
+            title = title_from_question(preview)
 
-     self.conversation_repo.delete(conversation)
+        payload: dict[str, Any] = {
+            "id": conversation.id,
+            "title": title,
+            "preview": preview,
+            "message_count": len(messages),
+            "created_at": conversation.created_at,
+            "updated_at": conversation.updated_at,
+        }
 
-     return True
+        if include_messages:
+            payload["messages"] = [
+                {
+                    "id": message.id,
+                    "role": message.role,
+                    "content": message.content,
+                    "citations": message.citations,
+                    "created_at": message.created_at,
+                }
+                for message in messages
+            ]
+
+        return payload

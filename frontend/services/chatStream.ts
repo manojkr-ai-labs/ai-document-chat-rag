@@ -3,6 +3,7 @@ const API_URL =
 
 export async function streamChat(
   question: string,
+  conversation_id: string | null,
   onChunk: (chunk: string) => void,
   signal?: AbortSignal
 ) {
@@ -12,7 +13,8 @@ export async function streamChat(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      question,
+       question,
+       conversation_id,
     }),
     signal
   });
