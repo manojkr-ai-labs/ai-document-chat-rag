@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { renameConversation } from "@/services/conversation";
+import { renameConversation,deleteConversation } from "@/services/conversation";
 
 interface ConversationItemProps {
   id: string;
   title: string;
   selected?: boolean;
   onClick: () => void;
+   onDelete?: (id: string) => void;
 }
 
 export default function ConversationItem({
@@ -15,10 +16,13 @@ export default function ConversationItem({
   title,
   selected = false,
   onClick,
+  onDelete
 }: ConversationItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
   const [isSaving, setIsSaving] = useState(false);
+
+ const [isDeleting, setIsDeleting] = useState(false);
 
   const handleRename = async () => {
     const newTitle = editTitle.trim();
@@ -44,6 +48,34 @@ export default function ConversationItem({
       setEditTitle(title);
     } finally {
       setIsSaving(false);
+    }
+  };
+   const handleDelete = async () => {
+    const confirmed = window.confirm(
+      `Delete "${title}"?\n\nThis will permanently delete the conversation and its messages.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+
+      await deleteConversation(id);
+
+      onDelete?.(id);
+    } catch (error) {
+      console.error(
+        "Failed to delete conversation:",
+        error
+      );
+
+      window.alert(
+        "Failed to delete conversation. Please try again."
+      );
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -109,6 +141,7 @@ export default function ConversationItem({
         type="button"
         onClick={onClick}
         className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-left"
+        disabled={isDeleting}
       >
         <span>💬</span>
 
@@ -125,9 +158,22 @@ export default function ConversationItem({
           setEditTitle(title);
           setIsEditing(true);
         }}
+        disabled={isDeleting}
         className="mr-2 rounded px-2 py-1 text-sm hover:bg-white"
       >
         ✏️
+      </button>
+      <button
+        type="button"
+        title="Delete conversation"
+        disabled={isDeleting}
+        onClick={(event) => {
+          event.stopPropagation();
+          handleDelete();
+        }}
+        className="mr-2 rounded px-2 py-1 text-sm hover:bg-red-50 disabled:opacity-50"
+      >
+        {isDeleting ? "..." : "🗑️"}
       </button>
     </div>
   );

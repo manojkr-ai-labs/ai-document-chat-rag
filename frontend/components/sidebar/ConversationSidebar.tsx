@@ -29,7 +29,16 @@ export default function ConversationSidebar({
     // Do not create an empty row in the DB — first message creates the chat
     onNewChatStarted?.();
   };
+  const handleDeleteConversation = (id: string) => {
+    // If the deleted conversation is currently selected,
+    // clear the current chat.
+    if (selectedConversationId === id) {
+      onSelectConversation("");
+    }
 
+    // Refresh sidebar and backend state.
+    window.location.reload();
+  };
   return (
     <div className="flex h-full w-80 flex-col border-r bg-white p-4">
       <NewChatButton
@@ -77,6 +86,7 @@ export default function ConversationSidebar({
               title={title}
               selected={selectedConversationId === id}
               onClick={() => onSelectConversation(id)}
+               onDelete={handleDeleteConversation}
             />
           );
         })}
