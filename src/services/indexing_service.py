@@ -51,8 +51,16 @@ def process_pdf(pdf_path, manifest):
     total_batches = (len(chunks) + EMBED_BATCH_SIZE - 1) // EMBED_BATCH_SIZE
 
     for i in range(0, len(chunks), EMBED_BATCH_SIZE):
-
+        
         batch = chunks[i:i + EMBED_BATCH_SIZE]
+        logger.info(
+          "CHUNK %s | source=%s | page=%s | length=%s | preview=%s",
+          i,
+          chunks[i].metadata.get("source"),
+          chunks[i].metadata.get("page"),
+          len(chunks[i].page_content),
+           chunks[i].page_content[:200].replace("\n", " "),
+          )
 
         logger.info(f"Embedding batch {i // EMBED_BATCH_SIZE + 1}/{total_batches}")
         vector_db.add_documents(batch)

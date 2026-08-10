@@ -19,9 +19,12 @@ services:
       BASE_URL: http://host.docker.internal:11434
 
     volumes:
+      - ./src:/app/src
       - ./documents:/app/documents
       - ./storage:/app/storage
       - ./logs:/app/logs
+
+    command: uvicorn src.api.app:app --host 0.0.0.0 --port 8000 --reload
 
     restart: unless-stopped
 

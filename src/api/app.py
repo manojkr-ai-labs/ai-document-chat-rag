@@ -65,10 +65,11 @@ print(">>> CORS middleware configured")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,    
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Conversation-ID"],
 )
 
 app.add_middleware(RequestLoggingMiddleware)

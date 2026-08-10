@@ -13,14 +13,14 @@ from src.background.tasks import get_task
 from fastapi import HTTPException
 from src.exceptions.custom_exceptions import DocumentNotFound, TaskNotFound
 
-from fastapi.responses import StreamingResponse
-from src.services.rag_stream_service import stream_answer
+from fastapi.responses import StreamingResponse 
+from src.services.chat_stream_service import ChatStreamService
 from sqlalchemy.orm import Session
 from fastapi import Depends
 
 from src.database.database import get_db
 from src.services.conversation_service import ConversationService
-from src.services.chat_service import ChatService
+from src.services.chat_service import ChatService 
 
 from src.background.tasks import (
     create_task,
@@ -80,21 +80,40 @@ def chat(
         "execution_time": execution_time,
     }
 
-@router.post("/chat/stream",
+@router.post(
+    "/chat/stream",
     summary="Stream an answer",
-    description="Generate an answer using the indexed documents and stream it token by token.",
+    description=(
+        "Generate an answer using indexed documents "
+        "and stream it token by token."
+    ),
     tags=["Chat"],
 )
-def chat_stream(request: ChatRequest):
+def chat_stream(
+    request: ChatRequest,
+    db: Session = Depends(get_db),
+):
+    service = ChatStreamService(db)
+
+    conversation_id = service.get_or_create_conversation_id(
+        question=request.question,
+        conversation_id=request.conversation_id,
+    )
 
     def generate():
-        for chunk in stream_answer(request.question):
-            yield chunk
+        yield from service.stream(
+            question=request.question,
+            conversation_id=conversation_id,
+        )
 
     return StreamingResponse(
         generate(),
         media_type="text/plain",
-    ) 
+        headers={
+            "X-Conversation-ID": conversation_id,
+        },
+    )
+
 
 @router.post("/upload", response_model=UploadResponse,
       summary="Upload a document",
