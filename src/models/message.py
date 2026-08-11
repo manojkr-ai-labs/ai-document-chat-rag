@@ -28,7 +28,7 @@ class Message(Base):
         Text
     )
 
-    citations: Mapped[dict | None] = mapped_column(
+    citations: Mapped[list[dict] | None] = mapped_column(
         JSON,
         nullable=True
     )

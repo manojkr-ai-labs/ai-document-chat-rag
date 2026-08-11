@@ -52,7 +52,7 @@ class ChatStreamService:
         self,
         question: str,
         conversation_id: str,
-    ) -> Generator[str, None, None]:
+    ) -> Generator[str, None, list[dict]]:
         """
         Stream the RAG response and persist messages.
         """
@@ -90,10 +90,19 @@ class ChatStreamService:
 
         complete_answer = ""
 
-        for chunk in stream_answer(question):
-            complete_answer += chunk
+        stream = stream_answer(question)
 
-            yield chunk
+        while True:
+           try:
+             chunk = next(stream)
+ 
+             complete_answer += chunk
+
+             yield chunk
+
+           except StopIteration as exc:
+             citations = exc.value
+             break
 
         # --------------------------------------------------
         # Save final assistant message
@@ -103,7 +112,7 @@ class ChatStreamService:
             conversation_id=conversation.id,
             role="assistant",
             content=complete_answer,
-            citations=None,
+            citations=citations,
         )
 
         self.message_repo.save(assistant_message)

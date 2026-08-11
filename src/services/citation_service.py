@@ -1,7 +1,7 @@
 from pathlib import Path
+from src.utils.logger import logger
 
-
-def build_citations(documents):
+def build_citations(documents: list) -> list[dict]:
     """
     Build a unique list of source citations from retrieved documents.
     """
@@ -13,7 +13,9 @@ def build_citations(documents):
         source = Path(
             doc.metadata.get("source", "Unknown")
         ).name
-
+        logger.info(
+                f"Citation metadata: {doc.metadata}"
+            )
         page = doc.metadata.get(
             "page_label",
             doc.metadata.get("page", "?")

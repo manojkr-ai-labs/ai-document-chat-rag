@@ -2,13 +2,21 @@ from src.vectorstore.chroma_store import vector_db
 from src.config.settings import TOP_K_RESULTS
 from src.utils.logger import logger
 
+
 def retrieve_documents(
     query: str,
     k: int = TOP_K_RESULTS,
 ):
+    logger.info("========== RETRIEVER START ==========")
+    logger.info(f"Query: {query}")
+
     results = vector_db.similarity_search_with_score(
         query=query,
         k=k,
+    )
+
+    logger.info(
+        f"Chroma returned {len(results)} documents"
     )
 
     relevant_documents = []
@@ -20,11 +28,13 @@ def retrieve_documents(
             f"| page={document.metadata.get('page')}"
         )
 
-        if score < 1.0:
-            relevant_documents.append(document)
+        relevant_documents.append(document)
 
     logger.info(
-        f"Relevant documents: {len(relevant_documents)}/{len(results)}"
+        f"Relevant documents: "
+        f"{len(relevant_documents)}/{len(results)}"
     )
+
+    logger.info("========== RETRIEVER END ==========")
 
     return relevant_documents
