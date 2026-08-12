@@ -1,5 +1,8 @@
 from src.vectorstore.chroma_store import vector_db
-from src.config.settings import TOP_K_RESULTS
+from src.config.settings import (
+    RELEVANCE_THRESHOLD,
+    TOP_K_RESULTS,
+)
 from src.utils.logger import logger
 
 
@@ -9,6 +12,10 @@ def retrieve_documents(
 ):
     logger.info("========== RETRIEVER START ==========")
     logger.info(f"Query: {query}")
+    logger.info(
+        f"Retrieval config | top_k={k} "
+        f"| threshold={RELEVANCE_THRESHOLD}"
+    )
 
     results = vector_db.similarity_search_with_score(
         query=query,
@@ -22,13 +29,29 @@ def retrieve_documents(
     relevant_documents = []
 
     for document, score in results:
-        logger.info(
-            f"Retrieved | score={score:.4f} "
-            f"| source={document.metadata.get('source')} "
-            f"| page={document.metadata.get('page')}"
+        source = document.metadata.get(
+            "source",
+            "Unknown",
+        )
+        page = document.metadata.get(
+            "page",
+            "?",
         )
 
-        relevant_documents.append(document)
+        if score < RELEVANCE_THRESHOLD:
+            relevant_documents.append(document)
+
+            logger.info(
+                f"ACCEPTED | score={score:.4f} "
+                f"| source={source} "
+                f"| page={page}"
+            )
+        else:
+            logger.info(
+                f"REJECTED | score={score:.4f} "
+                f"| source={source} "
+                f"| page={page}"
+            )
 
     logger.info(
         f"Relevant documents: "

@@ -1,12 +1,9 @@
-
-import http
-
-from dotenv import load_dotenv
 import os
-
-load_dotenv()
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 DOCUMENTS_DIR = BASE_DIR / "documents"
@@ -34,8 +31,12 @@ CHUNK_SIZE = 800
 CHUNK_OVERLAP = 100
 
 TOP_K_RESULTS = 5
+RELEVANCE_THRESHOLD = float(
+    os.getenv("RELEVANCE_THRESHOLD", "1.0")
+)
 
 EMBED_BATCH_SIZE = 100
+
 
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
