@@ -7,14 +7,15 @@ from src.utils.logger import logger
 
 
 def retrieve_documents(
-    query: str,
+     query: str,
     k: int = TOP_K_RESULTS,
+    threshold: float = RELEVANCE_THRESHOLD,
 ):
     logger.info("========== RETRIEVER START ==========")
     logger.info(f"Query: {query}")
     logger.info(
         f"Retrieval config | top_k={k} "
-        f"| threshold={RELEVANCE_THRESHOLD}"
+        f"| threshold={threshold}"
     )
 
     results = vector_db.similarity_search_with_score(
@@ -38,7 +39,7 @@ def retrieve_documents(
             "?",
         )
 
-        if score < RELEVANCE_THRESHOLD:
+        if score < threshold:
             relevant_documents.append(document)
 
             logger.info(
