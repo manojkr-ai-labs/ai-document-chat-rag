@@ -4,7 +4,7 @@ from src.config.settings import (
     TOP_K_RESULTS,
 )
 from src.utils.logger import logger
-
+from src.retriever.retrieval_result import RetrievalResult
 
 def retrieve_documents(
      query: str,
@@ -62,3 +62,32 @@ def retrieve_documents(
     logger.info("========== RETRIEVER END ==========")
 
     return relevant_documents
+
+def retrieve_candidates(
+    query: str,
+    k: int = TOP_K_RESULTS,
+) -> list[RetrievalResult]:
+    logger.info("========== CANDIDATE RETRIEVAL START ==========")
+    logger.info(f"Query: {query}")
+    logger.info(f"Candidate retrieval config | top_k={k}")
+
+    results = vector_db.similarity_search_with_score(
+        query=query,
+        k=k,
+    )
+
+    candidates = [
+       RetrievalResult(
+            document=document,
+            retrieval_score=score,
+        )
+        for document, score in results
+    ]
+
+    logger.info(
+        f"Retrieved {len(candidates)} candidates"
+    )
+
+    logger.info("========== CANDIDATE RETRIEVAL END ==========")
+
+    return candidates

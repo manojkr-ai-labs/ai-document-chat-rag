@@ -1,10 +1,12 @@
-from src.retriever.document_retriever import retrieve_documents
+from src.retriever.reranked_retriever import RerankedRetriever
 from src.prompts.rag_prompt import build_prompt
 from src.agents.rag_agent import ask_llm
 from src.services.citation_service import build_citations
 from src.memory.conversation_memory import memory
 from src.utils.logger import logger
 from pathlib import Path
+
+retriever = RerankedRetriever()
 
 def answer_question(question: str):
 
@@ -19,8 +21,19 @@ def answer_question(question: str):
     conversation = memory.get_context()
 
     # Retrieve documents
-    documents = retrieve_documents(question)
+    results = retriever.retrieve(
+        query=question,
+    )
 
+    documents = [
+        result.document
+        for result in results
+    ]
+
+    logger.info(
+        f"Final relevant documents: {len(documents)}"
+    )
+    
     # Build citations
     citationsResult = build_citations(documents)
     unique = {}

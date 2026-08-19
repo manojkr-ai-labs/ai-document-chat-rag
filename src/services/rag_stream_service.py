@@ -1,9 +1,14 @@
-from src.retriever.document_retriever import retrieve_documents
+from src.retriever.reranked_retriever import RerankedRetriever
 from src.prompts.rag_prompt import build_prompt
 from src.agents.rag_agent import ask_llm_stream
 from src.memory.conversation_memory import memory
 from src.utils.logger import logger
 from src.services.citation_service import build_citations
+
+
+# Initialize once when the application starts/imports.
+# The CrossEncoder model should NOT be loaded for every request.
+retriever = RerankedRetriever()
 
 
 def stream_answer(question: str):
@@ -17,11 +22,22 @@ def stream_answer(question: str):
 
     memory.add_user(question)
 
-    # Retrieve relevant documents
-    documents = retrieve_documents(question)
+    # Retrieve candidates → rerank → relevance gate
+    documents = retriever.retrieve(
+        query=question,
+    )
 
-    # Build citations from the same retrieved documents
-    citations = build_citations(documents)
+    logger.info(
+        f"Final relevant documents: {len(documents)}"
+    )
+
+    # Build citations from the same final documents
+    citations = build_citations(
+        [
+            result.document
+            for result in documents
+        ]
+    )
 
     logger.info(
         f"Generated {len(citations)} citations"
@@ -29,7 +45,10 @@ def stream_answer(question: str):
 
     # Build RAG prompt
     prompt = build_prompt(
-        context=documents,
+        context=[
+            result.document
+            for result in documents
+        ],
         question=question,
         conversation=memory.get_context(),
     )

@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
-
-@patch("src.api.routes.answer_question")
+ 
+@patch("src.services.chat_service.answer_question")
 def test_chat_success(mock_answer, client):
     mock_answer.return_value = {
         "answer": "Docker is a container platform.",
@@ -24,7 +24,7 @@ def test_chat_success(mock_answer, client):
     assert body["data"]["citations"] == []
 
 
-@patch("src.api.routes.answer_question")
+@patch("src.api.routes.answer_question") 
 def test_chat_empty_question(mock_answer, client):
     mock_answer.return_value = {
         "answer": "",
@@ -49,8 +49,8 @@ def test_chat_missing_question(client):
 
     assert response.status_code == 422
 
-
-@patch("src.api.routes.answer_question")
+ 
+@patch("src.services.chat_service.answer_question")
 def test_chat_citations(mock_answer, client):
     mock_answer.return_value = {
         "answer": "Docker",

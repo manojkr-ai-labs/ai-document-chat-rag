@@ -1,0 +1,36 @@
+from src.config.settings import TOP_K_RESULTS, RERANK_TOP_N
+from src.retriever.document_retriever import retrieve_candidates
+from src.reranker.cross_encoder_reranker import CrossEncoderReranker
+from src.reranker.relevance_gate import filter_relevant_results
+
+
+class RerankedRetriever:
+
+    def __init__(
+        self,
+        reranker: CrossEncoderReranker | None = None,
+    ):
+        self.reranker = (
+            reranker
+            if reranker is not None
+            else CrossEncoderReranker()
+        )
+
+    def retrieve(
+        self,
+        query: str,
+        k: int = TOP_K_RESULTS,
+        top_n: int = RERANK_TOP_N,
+    ):
+        candidates = retrieve_candidates(
+            query=query,
+            k=k,
+        )
+
+        ranked = self.reranker.rerank(
+            query=query,
+            candidates=candidates,
+            top_n=top_n,
+        )
+
+        return filter_relevant_results(ranked)
