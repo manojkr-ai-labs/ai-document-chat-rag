@@ -13,3 +13,5 @@ def test_index(mock_index, client):
 
     assert body["success"] is True
     assert body["message"] == "Documents indexed successfully"
+
+    mock_index.assert_called_once_with()

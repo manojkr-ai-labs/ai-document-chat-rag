@@ -18,13 +18,15 @@ def test_chat_success(mock_answer, client):
     assert response.status_code == 200
 
     body = response.json()
-
     assert body["success"] is True
+    assert body["message"] == "Answer generated successfully"
+    assert body["data"]["conversation_id"]
     assert body["data"]["answer"] == "Docker is a container platform."
     assert body["data"]["citations"] == []
 
 
-@patch("src.api.routes.answer_question") 
+ 
+@patch("src.services.chat_service.answer_question")
 def test_chat_empty_question(mock_answer, client):
     mock_answer.return_value = {
         "answer": "",
@@ -34,12 +36,17 @@ def test_chat_empty_question(mock_answer, client):
     response = client.post(
         "/chat",
         json={
-            "question": ""
+            "question": "",
         },
     )
 
-    assert response.status_code in [200, 400, 422]
+    assert response.status_code == 200
 
+    body = response.json()
+
+    assert body["success"] is True
+    assert body["data"]["answer"] == ""
+    assert body["data"]["citations"] == []
 
 def test_chat_missing_question(client):
     response = client.post(

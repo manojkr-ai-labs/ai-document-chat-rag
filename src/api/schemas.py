@@ -56,9 +56,7 @@ class BaseResponse(BaseModel):
 
 class ChatData(BaseModel):
     conversation_id: str
-
     answer: str
-
     citations: list[Citation]
 
 
