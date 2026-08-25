@@ -13,7 +13,8 @@ def test_retrieval():
 
         if case["should_retrieve"]:
             assert any(
-                case["expected_source"] in source
+                expected_source in source
+                for expected_source in case["expected_sources"]
                 for source in sources
             ), (
                 f"Expected source not retrieved for: "
