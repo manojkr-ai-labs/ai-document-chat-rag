@@ -1,40 +1,80 @@
 from pathlib import Path
 
-from src.config.settings import TOP_K_RESULTS
-from src.retriever.document_retriever import retrieve_documents
-from tests.evaluation.retrieval_questions import EVALUATION_QUESTIONS
+from src.config.settings import (
+    TOP_K_RESULTS,
+)
+from src.retriever.document_retriever import retrieve_candidates
+from src.reranker.cross_encoder_reranker import CrossEncoderReranker
+from tests.evaluation.retrieval_questions import (
+    EVALUATION_QUESTIONS,
+)
 
- 
+
 THRESHOLDS = [
-    0.95,
-    0.98,
-    1.00,
-    1.02,
-    1.05,
-    1.08,
-    1.10,
+    0.0001,
+    0.001,
+    0.003,
+    0.005,
+    0.010,
+    0.020,
+    0.030,
+    0.040,
 ]
 
 
-def evaluate_question(case: dict, threshold: float) -> dict:
-    documents = retrieve_documents(
-        case["question"],
+reranker = CrossEncoderReranker()
+
+
+def normalize_source(source: str) -> str:
+    return Path(source).name
+
+
+def evaluate_question(
+    case: dict,
+    threshold: float,
+) -> dict:
+
+    candidates = retrieve_candidates(
+        query=case["question"],
         k=TOP_K_RESULTS,
-        threshold=threshold,
     )
 
+    ranked_results = reranker.rerank(
+        query=case["question"],
+        candidates=candidates,
+        top_n=TOP_K_RESULTS,
+    )
+
+    filtered_results = [
+        result
+        for result in ranked_results
+        if (
+            result.rerank_score is not None
+            and result.rerank_score >= threshold
+        )
+    ]
+
     retrieved_sources = {
-        Path(
-            document.metadata.get("source", "")
-        ).name
-        for document in documents
+        normalize_source(
+            result.document.metadata.get(
+                "source",
+                "",
+            )
+        )
+        for result in filtered_results
     }
 
-    expected_source = case["expected_source"]
+    expected_sources = {
+        normalize_source(source)
+        for source in case["expected_sources"]
+    }
+
     should_retrieve = case["should_retrieve"]
 
     if should_retrieve:
-        passed = expected_source in retrieved_sources
+        passed = bool(
+            retrieved_sources & expected_sources
+        )
     else:
         passed = len(retrieved_sources) == 0
 
@@ -44,7 +84,9 @@ def evaluate_question(case: dict, threshold: float) -> dict:
         "retrieved_sources": retrieved_sources,
     }
 
+
 def evaluate_threshold(threshold: float):
+
     print(f"\nThreshold: {threshold}")
     print("=" * 60)
 
@@ -54,13 +96,16 @@ def evaluate_threshold(threshold: float):
     false_negative = 0
 
     for case in EVALUATION_QUESTIONS:
+
         result = evaluate_question(
             case,
             threshold,
         )
 
         should_retrieve = result["should_retrieve"]
-        retrieved = len(result["retrieved_sources"]) > 0
+        retrieved = len(
+            result["retrieved_sources"]
+        ) > 0
 
         if should_retrieve and retrieved:
             true_positive += 1
@@ -83,7 +128,6 @@ def evaluate_threshold(threshold: float):
             f"{case['question']}"
         )
 
-   
     total = len(EVALUATION_QUESTIONS)
 
     precision = (
@@ -107,25 +151,32 @@ def evaluate_threshold(threshold: float):
         else 0
     )
 
+    accuracy = (
+        true_positive + true_negative
+    ) / total
+
     return {
         "threshold": threshold,
         "true_positive": true_positive,
         "true_negative": true_negative,
         "false_positive": false_positive,
         "false_negative": false_negative,
-        "accuracy": (true_positive + true_negative) / total,
+        "accuracy": accuracy,
         "precision": precision,
         "recall": recall,
         "f1": f1,
     }
 
 
-        
 if __name__ == "__main__":
+
     results = []
 
     for threshold in THRESHOLDS:
-        result = evaluate_threshold(threshold)
+        result = evaluate_threshold(
+            threshold
+        )
+
         results.append(result)
 
     print()
@@ -140,8 +191,9 @@ if __name__ == "__main__":
     print("-" * 60)
 
     for result in results:
+
         print(
-            f"{result['threshold']:<12}"
+            f"{result['threshold']:<12.4f}"
             f"{result['accuracy']:<12.2%}"
             f"{result['precision']:<12.2%}"
             f"{result['recall']:<12.2%}"

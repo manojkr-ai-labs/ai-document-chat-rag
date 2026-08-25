@@ -51,3 +51,21 @@ def test_relevance_gate_rejects_missing_score():
     filtered = filter_relevant_results(results)
 
     assert len(filtered) == 0
+
+def test_relevance_gate_filters_mixed_results():
+    results = [
+        make_result(RERANK_RELEVANCE_THRESHOLD + 0.1),
+        make_result(RERANK_RELEVANCE_THRESHOLD - 0.1),
+        make_result(None),
+        make_result(RERANK_RELEVANCE_THRESHOLD),
+    ]
+
+    filtered = filter_relevant_results(results)
+
+    assert len(filtered) == 2
+    assert filtered[0].rerank_score == (
+        RERANK_RELEVANCE_THRESHOLD + 0.1
+    )
+    assert filtered[1].rerank_score == (
+        RERANK_RELEVANCE_THRESHOLD
+    )

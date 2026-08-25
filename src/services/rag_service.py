@@ -5,6 +5,7 @@ from src.services.citation_service import build_citations
 from src.memory.conversation_memory import memory
 from src.utils.logger import logger
 from pathlib import Path
+from unittest.mock import patch
 
 retriever = RerankedRetriever()
 
@@ -55,6 +56,17 @@ def answer_question(question: str):
         question=question,
         conversation=conversation,
     )
+    real_retriever = answer_question.__globals__["retriever"]
+
+    captured_results = []
+
+    original_retrieve = real_retriever.retrieve
+
+
+    def capture_retrieve(*args, **kwargs):
+        results = original_retrieve(*args, **kwargs)
+        captured_results.extend(results)
+        return results
 
     # Ask LLM
     answer = ask_llm(prompt)
