@@ -62,3 +62,36 @@ def test_empty_answer_returns_zero():
     )
 
     assert score == 0.0
+def test_paraphrased_claim_is_supported():
+    context = (
+        "The 69th IATA Annual General Meeting "
+        "addresses passenger rights and consumer "
+        "protection."
+    )
+
+    answer = (
+        "The IATA Annual General Meeting "
+        "addresses passenger rights."
+    )
+
+    assert evaluate_claim_faithfulness(
+        answer=answer,
+        context=context,
+    ) == 1.0
+
+
+def test_claim_with_insufficient_overlap_is_unsupported():
+    context = (
+        "The examination is conducted for "
+        "three hours."
+    )
+
+    answer = (
+        "The examination is conducted "
+        "in Mumbai."
+    )
+
+    assert evaluate_claim_faithfulness(
+        answer=answer,
+        context=context,
+    ) == 0.0
