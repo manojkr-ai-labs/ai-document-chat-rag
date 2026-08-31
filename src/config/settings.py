@@ -31,6 +31,10 @@ EMBEDDING_MODEL = os.getenv(
     "EMBEDDING_MODEL",
     "nomic-embed-text:latest",
 )
+RERANKER_MODEL = os.getenv(
+    "RERANKER_MODEL",
+    "BAAI/bge-reranker-base",
+)
 
 CHUNK_SIZE = 800
 CHUNK_OVERLAP = 100
