@@ -4,57 +4,49 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 DOCUMENTS_DIR = BASE_DIR / "documents"
 
-CHROMA_DIR = BASE_DIR / "storage" / "chroma"
+CHROMA_DIR = Path(
+    os.getenv("CHROMA_DIR", str(BASE_DIR / "storage" / "chroma"))
+)
 
 REPORT_DIR = BASE_DIR / "output" / "reports"
 
 SCREENSHOT_DIR = BASE_DIR / "screenshots"
 
+BASE_URL = os.getenv(
+    "BASE_URL",
+    "http://host.docker.internal:11434",
+)
 
-# BASE_URL = os.getenv("BASE_URL", "http://localhost:11434")
+LLM_MODEL = os.getenv(
+    "LLM_MODEL",
+    "llama3.2:latest",
+)
 
-BASE_URL = os.getenv("BASE_URL", "http://host.docker.internal:11434")
-
- 
-
-
-LLM_MODEL = "llama3.2"
-
-EMBEDDING_MODEL = "nomic-embed-text"
+EMBEDDING_MODEL = os.getenv(
+    "EMBEDDING_MODEL",
+    "nomic-embed-text:latest",
+)
 
 CHUNK_SIZE = 800
-
 CHUNK_OVERLAP = 100
 
 TOP_K_RESULTS = 5
+
 RELEVANCE_THRESHOLD = float(
     os.getenv("RELEVANCE_THRESHOLD", "1.0")
 )
+
 RERANK_TOP_N = 2
 RERANK_RELEVANCE_THRESHOLD = 0.005
 
 EMBED_BATCH_SIZE = 100
 
-
-
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
-
-
-
-# MODEL = os.getenv("MODEL", "llama3.2")
-# EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
-
-
-# CHROMA_PATH = os.getenv("CHROMA_PATH", "storage/chroma")
-
-# DOCUMENTS_PATH = os.getenv("DOCUMENTS_PATH", "documents")
-
-
-# EMBED_BATCH_SIZE = int(os.getenv("EMBED_BATCH_SIZE", "100"))
-
-
-# TOP_K = int(os.getenv("TOP_K", 5))
+LOG_LEVEL = os.getenv(
+    "LOG_LEVEL",
+    "INFO",
+)
