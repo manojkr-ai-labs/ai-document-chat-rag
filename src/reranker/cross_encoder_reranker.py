@@ -1,9 +1,13 @@
+import os
 from sentence_transformers import CrossEncoder
 
 from src.retriever.retrieval_result import RetrievalResult
 
 
-MODEL_NAME = "BAAI/bge-reranker-base"
+MODEL_NAME = os.getenv(
+    "RERANKER_MODEL",
+    "BAAI/bge-reranker-base",
+)
 
 
 class CrossEncoderReranker:
