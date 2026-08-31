@@ -9,17 +9,21 @@ from unittest.mock import patch
 
 retriever = RerankedRetriever()
 
-def answer_question(question: str):
+
+def answer_question(
+    question: str,
+    conversation: str | None = None,
+):
 
     logger.info("=" * 60)
     logger.info("Question Received")
     logger.info(question)
 
+    use_memory = conversation is None
     # Save user message
-    memory.add_user(question)
-
-    # Conversation history
-    conversation = memory.get_context()
+    if use_memory:
+        memory.add_user(question)
+        conversation = memory.get_context()
 
     # Retrieve documents
     results = retriever.retrieve(
@@ -72,7 +76,8 @@ def answer_question(question: str):
     answer = ask_llm(prompt)
 
     # Save AI response
-    memory.add_ai(answer)
+    if use_memory:
+        memory.add_ai(answer)
 
     return {
         "answer": answer,
