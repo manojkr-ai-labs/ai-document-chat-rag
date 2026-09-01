@@ -11,7 +11,10 @@ from src.services.citation_service import build_citations
 retriever = RerankedRetriever()
 
 
-def stream_answer(question: str):
+def stream_answer(
+    question: str,
+    conversation: str | None = None,
+):
     """
     Stream an answer from the RAG pipeline.
     """
@@ -20,7 +23,11 @@ def stream_answer(question: str):
     logger.info("Streaming Question Received")
     logger.info(question)
 
-    memory.add_user(question)
+    use_memory = conversation is None
+
+    if use_memory:
+        memory.add_user(question)
+        conversation = memory.get_context()
 
     # Retrieve candidates → rerank → relevance gate
     documents = retriever.retrieve(
@@ -50,7 +57,7 @@ def stream_answer(question: str):
             for result in documents
         ],
         question=question,
-        conversation=memory.get_context(),
+        conversation=conversation,
     )
 
     logger.info("=" * 60)
@@ -65,6 +72,7 @@ def stream_answer(question: str):
         complete_answer += chunk
         yield chunk
 
-    memory.add_ai(complete_answer)
+    if use_memory:
+        memory.add_ai(complete_answer)
 
     return citations

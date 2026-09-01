@@ -85,12 +85,28 @@ class ChatStreamService:
         self.message_repo.save(user_message)
 
         # --------------------------------------------------
+        # Build persistent conversation history
+        # --------------------------------------------------
+
+        messages = self.message_repo.list_by_conversation(
+            conversation.id
+        )
+
+        conversation_history = "\n".join(
+            f"{message.role.capitalize()}: {message.content}"
+            for message in messages
+        )
+
+        # --------------------------------------------------
         # Stream assistant response
         # --------------------------------------------------
 
         complete_answer = ""
 
-        stream = stream_answer(question)
+        stream = stream_answer(
+            question,
+            conversation=conversation_history
+            )
 
         while True:
            try:
