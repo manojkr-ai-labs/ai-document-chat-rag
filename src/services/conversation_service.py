@@ -2,9 +2,9 @@ from typing import Any, Optional
 
 from sqlalchemy.orm import Session
 
+from src.models.conversation import Conversation
 from src.repositories.conversation_repository import ConversationRepository
 from src.repositories.message_repository import MessageRepository
-from src.models.conversation import Conversation
 
 
 PLACEHOLDER_TITLES = {"New Chat", "string", ""}
@@ -12,15 +12,17 @@ PLACEHOLDER_TITLES = {"New Chat", "string", ""}
 
 def title_from_question(question: str, max_len: int = 60) -> str:
     cleaned = " ".join(question.strip().split())
+
     if not cleaned:
         return "New Chat"
+
     if len(cleaned) > max_len:
         return f"{cleaned[: max_len - 1]}…"
+
     return cleaned
 
 
 class ConversationService:
-
     def __init__(self, db: Session):
         self.db = db
         self.conversation_repo = ConversationRepository(db)
@@ -31,16 +33,22 @@ class ConversationService:
         title: str = "New Chat",
     ) -> dict[str, Any]:
         conversation = self.conversation_repo.create(title)
-        return self._serialize_conversation(conversation, messages=[])
+
+        return self._serialize_conversation(
+            conversation,
+            messages=[],
+        )
 
     def get_conversation(
-        self, conversation_id: str
+        self,
+        conversation_id: str,
     ) -> Optional[Conversation]:
         return self.conversation_repo.get(conversation_id)
 
     def list_conversations(self) -> list[dict[str, Any]]:
         """
-        Return conversations as plain dicts for the sidebar.
+        Return conversations as plain dictionaries for the sidebar.
+
         Uses the first user message as the display title when the
         stored title is still a placeholder.
         """
@@ -51,7 +59,8 @@ class ConversationService:
             messages = self.message_repo.list_by_conversation(
                 conversation.id
             )
-            # Skip empty chats so the sidebar only shows real history
+
+            # Skip empty chats so the sidebar only shows real history.
             if not messages:
                 continue
 
@@ -97,7 +106,15 @@ class ConversationService:
             conversation,
             title,
         )
-        return self._serialize_conversation(updated, messages=[])
+
+        messages = self.message_repo.list_by_conversation(
+            conversation_id
+        )
+
+        return self._serialize_conversation(
+            updated,
+            messages=messages,
+        )
 
     def delete_conversation(self, conversation_id: str) -> bool:
         conversation = self.get_conversation(conversation_id)
@@ -106,6 +123,7 @@ class ConversationService:
             return False
 
         self.conversation_repo.delete(conversation)
+
         return True
 
     def _serialize_conversation(
@@ -115,12 +133,14 @@ class ConversationService:
         include_messages: bool = False,
     ) -> dict[str, Any]:
         first_user = next(
-            (m for m in messages if m.role == "user"),
+            (message for message in messages if message.role == "user"),
             None,
         )
+
         preview = first_user.content if first_user else None
 
         title = conversation.title or "New Chat"
+
         if title in PLACEHOLDER_TITLES and preview:
             title = title_from_question(preview)
 

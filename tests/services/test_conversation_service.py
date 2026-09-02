@@ -175,7 +175,6 @@ def test_get_conversation_with_messages_returns_none_when_missing():
 
     assert result is None
 
-
 def test_rename_conversation():
     conversation = SimpleNamespace(
         id="conversation-123",
@@ -203,6 +202,10 @@ def test_rename_conversation():
         return_value=renamed_conversation
     )
 
+    service.message_repo.list_by_conversation = Mock(
+        return_value=[]
+    )
+
     result = service.rename_conversation(
         "conversation-123",
         "New Title",
@@ -217,12 +220,66 @@ def test_rename_conversation():
         "New Title",
     )
 
+    service.message_repo.list_by_conversation.assert_called_once_with(
+        "conversation-123"
+    )
+
     assert result["id"] == "conversation-123"
     assert result["title"] == "New Title"
     assert result["preview"] is None
     assert result["message_count"] == 0
 
+def test_rename_conversation_preserves_message_metadata():
+    conversation = SimpleNamespace(
+        id="conversation-123",
+        title="Old Title",
+        created_at=None,
+        updated_at=None,
+    )
 
+    renamed_conversation = SimpleNamespace(
+        id="conversation-123",
+        title="New Title",
+        created_at=None,
+        updated_at=None,
+    )
+
+    messages = [
+        SimpleNamespace(
+            role="user",
+            content="What is RAG?",
+        ),
+        SimpleNamespace(
+            role="assistant",
+            content="RAG means Retrieval-Augmented Generation.",
+        ),
+    ]
+
+    db = Mock()
+
+    service = ConversationService(db)
+
+    service.conversation_repo.get = Mock(
+        return_value=conversation
+    )
+
+    service.conversation_repo.rename = Mock(
+        return_value=renamed_conversation
+    )
+
+    service.message_repo.list_by_conversation = Mock(
+        return_value=messages
+    )
+
+    result = service.rename_conversation(
+        "conversation-123",
+        "New Title",
+    )
+
+    assert result["id"] == "conversation-123"
+    assert result["title"] == "New Title"
+    assert result["preview"] == "What is RAG?"
+    assert result["message_count"] == 2
 def test_rename_conversation_returns_none_when_missing():
     db = Mock()
 
