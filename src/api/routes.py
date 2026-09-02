@@ -1,56 +1,61 @@
 from time import perf_counter
-from unittest import result
 
-from fastapi import APIRouter
-
-from src.api.schemas import BaseResponse, ChatRequest, ChatResponse, HealthData, HealthResponse, HealthResponse, TaskResponse, UploadResponse
-from src.services.rag_service import answer_question
-from fastapi import UploadFile, File
-from src.services.upload_service import save_document, upload_document
-from src.services.indexing_api_service import index_documents
-from fastapi import BackgroundTasks  
-from src.background.tasks import get_task
-from fastapi import HTTPException
-from src.exceptions.custom_exceptions import DocumentNotFound, TaskNotFound
-
-from fastapi.responses import StreamingResponse 
-from src.services.chat_stream_service import ChatStreamService
-from sqlalchemy.orm import Session
-from fastapi import Depends
-
-from src.database.database import get_db
-from src.services.conversation_service import ConversationService
-from src.services.chat_service import ChatService 
-
-from src.background.tasks import (
-    create_task,
-    process_document,
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    HTTPException,
+    UploadFile,
 )
+from fastapi.responses import StreamingResponse
+from sqlalchemy.orm import Session
+
 from src.api.schemas import (
+    BaseResponse,
+    ChatRequest,
     ConversationCreateRequest,
     ConversationRenameRequest,
+    HealthResponse,
+    TaskResponse,
+    UploadResponse,
 )
+from src.background.tasks import (
+    create_task,
+    get_task,
+    process_document,
+)
+from src.database.database import get_db
+from src.exceptions.custom_exceptions import TaskNotFound
+from src.health.service import check_health
+from src.services.chat_service import ChatService
+from src.services.chat_stream_service import ChatStreamService
+from src.services.conversation_service import ConversationService
+from src.services.indexing_api_service import index_documents
+from src.services.upload_service import upload_document
+
 
 router = APIRouter()
 
-@router.get("/health", response_model=HealthResponse,
-              summary="Health Check",
-              description="Check the health status of the API.",
-              tags=["Health"],
-              responses={
-                200: {"description": "Answer generated successfully"},
-                400: {"description": "Invalid request"},
-                404: {"description": "Document not found"},
-                500: {"description": "Internal server error"},
-               },
 
-    )
-async def health():
-    from src.health.service import check_health
+@router.get(
+    "/health",
+    response_model=HealthResponse,
+    summary="Health Check",
+    description="Check the health status of the API.",
+    tags=["Health"],
+    responses={
+        200: {"description": "Answer generated successfully"},
+        400: {"description": "Invalid request"},
+        404: {"description": "Document not found"},
+        500: {"description": "Internal server error"},
+    },
+)
+def health():
     return {
-            "success": True, 
-            "data": check_health()
-        }
+        "success": True,
+        "data": check_health(),
+    }
 
 
 @router.post("/chat")
@@ -58,7 +63,6 @@ def chat(
     request: ChatRequest,
     db: Session = Depends(get_db),
 ):
-
     start = perf_counter()
 
     service = ChatService(db)
@@ -79,6 +83,7 @@ def chat(
         "data": result,
         "execution_time": execution_time,
     }
+
 
 @router.post(
     "/chat/stream",
@@ -115,21 +120,23 @@ def chat_stream(
     )
 
 
-@router.post("/upload", response_model=UploadResponse,
-      summary="Upload a document",
-      description="Upload and process a document for indexing.",
-      tags=["Upload"],
-      responses={
-                      200: {"description": "Answer generated successfully"},
-                      400: {"description": "Invalid request"},
-                      404: {"description": "Document not found"},
-                      500: {"description": "Internal server error"},
-                     }
-             )
+@router.post(
+    "/upload",
+    response_model=UploadResponse,
+    summary="Upload a document",
+    description="Upload and process a document for indexing.",
+    tags=["Upload"],
+    responses={
+        200: {"description": "Answer generated successfully"},
+        400: {"description": "Invalid request"},
+        404: {"description": "Document not found"},
+        500: {"description": "Internal server error"},
+    },
+)
 async def upload(
     background_tasks: BackgroundTasks,
-    file: UploadFile = File(...), ):
-    print("========== UPLOAD HIT ==========")
+    file: UploadFile = File(...),
+):
     content = await file.read()
 
     result = upload_document(
@@ -155,42 +162,47 @@ async def upload(
         },
     }
 
-@router.post("/index", response_model=BaseResponse,
-     summary="Index documents",
-     description="Index the uploaded documents for searching.",
-     tags=["Indexing"],
+
+@router.post(
+    "/index",
+    response_model=BaseResponse,
+    summary="Index documents",
+    description="Index the uploaded documents for searching.",
+    tags=["Indexing"],
     responses={
-                     200: {"description": "Answer generated successfully"},
-                     400: {"description": "Invalid request"},
-                     404: {"description": "Document not found"},
-                     500: {"description": "Internal server error"},
-                    },
-             )
-def index(): 
+        200: {"description": "Answer generated successfully"},
+        400: {"description": "Invalid request"},
+        404: {"description": "Document not found"},
+        500: {"description": "Internal server error"},
+    },
+)
+def index():
     index_documents()
 
     return {
         "success": True,
-        "message": "Documents indexed successfully"
+        "message": "Documents indexed successfully",
     }
 
-@router.get("/tasks/{task_id}",  response_model=TaskResponse,
+
+@router.get(
+    "/tasks/{task_id}",
+    response_model=TaskResponse,
     summary="Get Task Status",
     description="Retrieve the status of a specific task.",
     tags=["Tasks"],
     responses={
-                    200: {"description": "Answer generated successfully"},
-                    400: {"description": "Invalid request"},
-                    404: {"description": "Document not found"},
-                    500: {"description": "Internal server error"},
-                   },
-            )
+        200: {"description": "Answer generated successfully"},
+        400: {"description": "Invalid request"},
+        404: {"description": "Document not found"},
+        500: {"description": "Internal server error"},
+    },
+)
 def task_status(task_id: str):
-
     task = get_task(task_id)
-    
+
     if task is None:
-      raise TaskNotFound("Task not found")
+        raise TaskNotFound("Task not found")
 
     return {
         "success": True,
@@ -201,7 +213,6 @@ def task_status(task_id: str):
     }
 
 
-# permisted chat
 @router.get(
     "/conversations",
     summary="List Conversations",
@@ -211,11 +222,13 @@ def list_conversations(
     db: Session = Depends(get_db),
 ):
     service = ConversationService(db)
+
     return {
-            "success": True,
-            "message": "All conversations retrieved successfully",
-            "data": service.list_conversations()
-        } 
+        "success": True,
+        "message": "All conversations retrieved successfully",
+        "data": service.list_conversations(),
+    }
+
 
 @router.get(
     "/conversations/{conversation_id}",
@@ -227,22 +240,23 @@ def get_conversation(
     db: Session = Depends(get_db),
 ):
     service = ConversationService(db)
- 
+
     conversation = service.get_conversation_with_messages(
-    conversation_id
-)
+        conversation_id,
+    )
 
     if conversation is None:
-     raise HTTPException(
-        status_code=404,
-        detail="Conversation not found",
-    )
+        raise HTTPException(
+            status_code=404,
+            detail="Conversation not found",
+        )
 
     return {
         "success": True,
         "message": "Conversation retrieved successfully",
         "data": conversation,
     }
+
 
 @router.post(
     "/conversations",
@@ -265,22 +279,10 @@ def create_conversation(
         "data": conversation,
     }
 
-def rename_conversation(
-    self,
-    conversation_id: str,
-    title: str,
-):
-    conversation = self.get_conversation(conversation_id)
 
-    if conversation is None:
-        return None
-
-    return self.conversation_repo.rename(
-        conversation,
-        title,
-    )
-
-@router.patch("/conversations/{conversation_id}")
+@router.patch(
+    "/conversations/{conversation_id}",
+)
 def rename_conversation(
     conversation_id: str,
     request: ConversationRenameRequest,
@@ -303,6 +305,7 @@ def rename_conversation(
         "success": True,
         "data": conversation,
     }
+
 
 @router.delete(
     "/conversations/{conversation_id}",
