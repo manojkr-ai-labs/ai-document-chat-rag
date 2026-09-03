@@ -54,12 +54,11 @@ def process_pdf(pdf_path, manifest):
         batch = chunks[i:i + EMBED_BATCH_SIZE]
 
         logger.info(
-            "CHUNK %s | source=%s | page=%s | length=%s | preview=%s",
+            "CHUNK %s | source=%s | page=%s | length=%s",
             i,
             chunks[i].metadata.get("source"),
             chunks[i].metadata.get("page"),
             len(chunks[i].page_content),
-            chunks[i].page_content[:200].replace("\n", " "),
         )
 
         logger.info(
