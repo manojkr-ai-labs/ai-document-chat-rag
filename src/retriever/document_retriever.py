@@ -6,13 +6,14 @@ from src.config.settings import (
 from src.utils.logger import logger
 from src.retriever.retrieval_result import RetrievalResult
 
+
 def retrieve_documents(
-     query: str,
+    query: str,
     k: int = TOP_K_RESULTS,
     threshold: float = RELEVANCE_THRESHOLD,
 ):
     logger.info("========== RETRIEVER START ==========")
-    logger.info(f"Query: {query}")
+    logger.info("Retrieval request received")
     logger.info(
         f"Retrieval config | top_k={k} "
         f"| threshold={threshold}"
@@ -63,13 +64,18 @@ def retrieve_documents(
 
     return relevant_documents
 
+
 def retrieve_candidates(
     query: str,
     k: int = TOP_K_RESULTS,
 ) -> list[RetrievalResult]:
-    logger.info("========== CANDIDATE RETRIEVAL START ==========")
-    logger.info(f"Query: {query}")
-    logger.info(f"Candidate retrieval config | top_k={k}")
+    logger.info(
+        "========== CANDIDATE RETRIEVAL START =========="
+    )
+    logger.info("Candidate retrieval request received")
+    logger.info(
+        f"Candidate retrieval config | top_k={k}"
+    )
 
     results = vector_db.similarity_search_with_score(
         query=query,
@@ -77,7 +83,7 @@ def retrieve_candidates(
     )
 
     candidates = [
-       RetrievalResult(
+        RetrievalResult(
             document=document,
             retrieval_score=score,
         )
@@ -88,6 +94,8 @@ def retrieve_candidates(
         f"Retrieved {len(candidates)} candidates"
     )
 
-    logger.info("========== CANDIDATE RETRIEVAL END ==========")
+    logger.info(
+        "========== CANDIDATE RETRIEVAL END =========="
+    )
 
     return candidates
