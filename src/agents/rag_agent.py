@@ -1,6 +1,7 @@
+from typing import Generator
+
 from src.llm_provider import llm
 from src.utils.logger import logger
-from typing import Generator
 
 
 def ask_llm(prompt: str) -> str:
@@ -23,6 +24,8 @@ def ask_llm(prompt: str) -> str:
     logger.info("LLM response received.")
 
     return response.content
+
+
 def ask_llm_stream(prompt: str) -> Generator[str, None, None]:
     logger.info("=" * 60)
     logger.info("Streaming response from LLM...")
@@ -34,9 +37,8 @@ def ask_llm_stream(prompt: str) -> Generator[str, None, None]:
         chunk_count += 1
 
         logger.info(
-            "LLM CHUNK %s: %r",
+            "LLM chunk received: %s",
             chunk_count,
-            chunk.content,
         )
 
         if chunk.content:
