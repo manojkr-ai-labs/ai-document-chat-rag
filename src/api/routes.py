@@ -37,6 +37,8 @@ from src.services.upload_service import upload_document
 
 router = APIRouter()
 
+MAX_UPLOAD_SIZE = 20 * 1024 * 1024
+
 
 @router.get(
     "/health",
@@ -130,6 +132,7 @@ def chat_stream(
         200: {"description": "Answer generated successfully"},
         400: {"description": "Invalid request"},
         404: {"description": "Document not found"},
+        413: {"description": "File too large"},
         500: {"description": "Internal server error"},
     },
 )
@@ -137,7 +140,13 @@ async def upload(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
 ):
-    content = await file.read()
+    content = await file.read(MAX_UPLOAD_SIZE + 1)
+
+    if len(content) > MAX_UPLOAD_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail="File size must be less than 20 MB.",
+        )
 
     result = upload_document(
         file.filename,
