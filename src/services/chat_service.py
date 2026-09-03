@@ -25,9 +25,6 @@ class ChatService:
         question: str,
         conversation_id: str | None = None,
     ):
-        print("========== CHAT SERVICE ==========")
-        print(question)
-
         if conversation_id is None:
             conversation = self.conversation_repo.create(
                 title_from_question(question)
@@ -54,14 +51,20 @@ class ChatService:
             citations=None,
         )
         self.message_repo.save(user_message)
+
         messages = self.message_repo.list_by_conversation(
             conversation.id
         )
+
         conversation_history = "\n".join(
             f"{message.role.capitalize()}: {message.content}"
             for message in messages
         )
-        result = answer_question(question, conversation=conversation_history)
+
+        result = answer_question(
+            question,
+            conversation=conversation_history,
+        )
 
         assistant_message = Message(
             conversation_id=conversation.id,
