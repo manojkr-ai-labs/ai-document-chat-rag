@@ -20,9 +20,7 @@ def stream_answer(
     """
 
     logger.info("=" * 60)
-    logger.info("Streaming Question Received")
-    logger.info(question)
-
+    logger.info("RAG request received")
     use_memory = conversation is None
 
     if use_memory:
@@ -60,11 +58,7 @@ def stream_answer(
         conversation=conversation,
     )
 
-    logger.info("=" * 60)
-    logger.info("FINAL RAG PROMPT")
-    logger.info("=" * 60)
-    logger.info(prompt)
-    logger.info("=" * 60)
+    logger.info("RAG prompt built successfully")
 
     complete_answer = ""
 
