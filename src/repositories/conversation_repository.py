@@ -4,8 +4,6 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from src.models.conversation import Conversation
-from src.repositories.message_repository import MessageRepository
-
 
 class ConversationRepository:
     def __init__(self, db: Session):
