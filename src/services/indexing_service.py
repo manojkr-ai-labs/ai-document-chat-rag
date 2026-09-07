@@ -6,6 +6,7 @@ from src.utils.file_utils import get_pdf_files
 from src.utils.hash_utils import calculate_file_hash
 from src.services.index_manifest import (
     load_manifest,
+    save_manifest,
     update_manifest,
     is_file_indexed,
 )
@@ -73,7 +74,7 @@ def process_pdf(pdf_path, manifest):
         pdf_path.name,
         file_hash,
     )
-
+    save_manifest(manifest)
     logger.info("Indexed successfully")
 
     return True
