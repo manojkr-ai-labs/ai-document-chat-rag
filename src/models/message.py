@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy import DateTime, ForeignKey, JSON, String, Text
@@ -34,8 +34,8 @@ class Message(Base):
     )
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.utcnow
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc)
     )
 
     conversation = relationship(

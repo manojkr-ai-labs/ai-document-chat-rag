@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -60,7 +60,7 @@ class ConversationRepository:
         new_title: str,
     ) -> Conversation:
         conversation.title = new_title
-        conversation.updated_at = datetime.utcnow()
+        conversation.updated_at = datetime.now(timezone.utc)
 
         self.db.commit()
         self.db.refresh(conversation)
