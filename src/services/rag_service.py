@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from src.retriever.reranked_retriever import RerankedRetriever
 from src.prompts.rag_prompt import build_prompt
 from src.agents.rag_agent import ask_llm
@@ -40,23 +38,7 @@ def answer_question(
     )
 
     # Build citations
-    citationsResult = build_citations(documents)
-    unique = {}
-    normalized_citations = []
-
-    for citation in citationsResult:
-        file_name = Path(citation["source"]).name
-        page = str(citation["page"])
-        key = f"{file_name}-{page}"
-
-        if key not in unique:
-            unique[key] = True
-            normalized_citations.append({
-                "source": file_name,
-                "page": page,
-            })
-
-    citations = normalized_citations
+    citations = build_citations(documents)
 
     # Build prompt
     prompt = build_prompt(
