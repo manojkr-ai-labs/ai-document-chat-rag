@@ -160,9 +160,18 @@ class HealthData(BaseModel):
 class HealthResponse(BaseResponse):
     data: HealthData
 
+
 class ConversationCreateRequest(BaseModel):
-    title: str = "New Chat"
+    title: str = Field(
+        default="New Chat",
+        min_length=1,
+        max_length=255,
+    )
 
 
 class ConversationRenameRequest(BaseModel):
-    title: str    
+    title: str = Field(
+        ...,
+        min_length=1,
+        max_length=255,
+    )
