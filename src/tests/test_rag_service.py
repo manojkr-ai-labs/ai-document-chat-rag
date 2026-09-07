@@ -35,8 +35,8 @@ def test_answer_question_returns_answer_and_citations(
 
     mock_build_citations.return_value = [
         {
-            "source": "/app/documents/docker.pdf",
-            "page": 1,
+            "source": "docker.pdf",
+            "page": "1",
         }
     ]
 
@@ -63,6 +63,10 @@ def test_answer_question_returns_answer_and_citations(
         query="What is Docker?",
     )
 
+    mock_build_citations.assert_called_once_with(
+        [document]
+    )
+
     mock_build_prompt.assert_called_once()
 
     mock_ask_llm.assert_called_once_with(
@@ -75,7 +79,7 @@ def test_answer_question_returns_answer_and_citations(
 @patch("src.services.rag_service.build_prompt")
 @patch("src.services.rag_service.build_citations")
 @patch("src.services.rag_service.retriever")
-def test_answer_question_deduplicates_citations(
+def test_answer_question_returns_citations_from_citation_service(
     mock_retriever,
     mock_build_citations,
     mock_build_prompt,
@@ -101,16 +105,14 @@ def test_answer_question_deduplicates_citations(
         mock_result,
     ]
 
-    mock_build_citations.return_value = [
+    citations = [
         {
-            "source": "/app/documents/docker.pdf",
-            "page": 1,
-        },
-        {
-            "source": "/app/documents/docker.pdf",
-            "page": 1,
-        },
+            "source": "docker.pdf",
+            "page": "1",
+        }
     ]
+
+    mock_build_citations.return_value = citations
 
     mock_build_prompt.return_value = "RAG PROMPT"
     mock_ask_llm.return_value = "Docker answer."
@@ -119,9 +121,8 @@ def test_answer_question_deduplicates_citations(
 
     assert result["answer"] == "Docker answer."
 
-    assert result["citations"] == [
-        {
-            "source": "docker.pdf",
-            "page": "1",
-        }
-    ]
+    assert result["citations"] == citations
+
+    mock_build_citations.assert_called_once_with(
+        [document, document]
+    )

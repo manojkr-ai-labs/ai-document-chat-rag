@@ -13,11 +13,7 @@ def build_citations(documents: list) -> list[dict]:
         source = Path(
             doc.metadata.get("source", "Unknown")
         ).name
-
-        page = doc.metadata.get(
-            "page_label",
-            doc.metadata.get("page", "?")
-        )
+        page = str(doc.metadata.get("page_label", doc.metadata.get("page", "?")))
 
         key = (source, page)
 
