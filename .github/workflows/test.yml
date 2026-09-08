@@ -59,6 +59,10 @@ jobs:
           mkdir -p storage/chroma
           mkdir -p output/reports
 
+      - name: Run Database Migrations
+        run: |
+          alembic upgrade head
+
       - name: Run Tests
         run: |
           pytest -v --cov=src --cov-report=xml
