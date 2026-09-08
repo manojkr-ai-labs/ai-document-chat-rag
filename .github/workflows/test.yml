@@ -55,6 +55,7 @@ jobs:
 
       - name: Prepare CI Directories
         run: |
+          mkdir -p storage/sqlite
           mkdir -p storage/chroma
           mkdir -p output/reports
 
