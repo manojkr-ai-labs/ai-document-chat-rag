@@ -63,6 +63,24 @@ jobs:
         run: |
           alembic upgrade head
 
+      - name: Start API
+        run: |
+          nohup uvicorn src.api.app:app \
+            --host 0.0.0.0 \
+            --port 8000 \
+            > /tmp/api.log 2>&1 &
+
+      - name: Index Documents
+        run: |
+          for i in {1..30}; do
+            if curl --fail http://127.0.0.1:8000/health; then
+              break
+            fi
+            sleep 2
+          done
+
+          curl --fail --request POST http://127.0.0.1:8000/index
+
       - name: Run Tests
         run: |
           pytest -v --cov=src --cov-report=xml
