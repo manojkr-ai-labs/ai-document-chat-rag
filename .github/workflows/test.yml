@@ -53,6 +53,11 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov
 
+      - name: Prepare CI Directories
+        run: |
+          mkdir -p storage/chroma
+          mkdir -p output/reports
+
       - name: Run Tests
         run: |
           pytest -v --cov=src --cov-report=xml
