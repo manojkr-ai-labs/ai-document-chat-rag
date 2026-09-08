@@ -51,7 +51,7 @@ jobs:
             --index-url https://download.pytorch.org/whl/cpu
 
           pip install -r requirements.txt
-          pip install pytest pytest-cov
+          pip install alembic pytest pytest-cov
 
       - name: Prepare CI Directories
         run: |
