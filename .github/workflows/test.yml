@@ -13,6 +13,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      BASE_URL: http://127.0.0.1:11434
+      LLM_MODEL: llama3.2:latest
+      EMBEDDING_MODEL: nomic-embed-text:latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -21,6 +26,21 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Start Ollama
+        run: |
+          nohup ollama serve > /tmp/ollama.log 2>&1 &
+          sleep 5
+          curl --fail http://127.0.0.1:11434/api/tags
+
+      - name: Pull Ollama Models
+        run: |
+          ollama pull llama3.2:latest
+          ollama pull nomic-embed-text:latest
 
       - name: Install Dependencies
         run: |
