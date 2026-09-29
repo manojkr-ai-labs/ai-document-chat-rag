@@ -293,8 +293,8 @@ return (
     {/* Sidebar */}
     <ConversationSidebar
       selectedConversationId={selectedConversationId}
-      onSelectConversation={handleSelectConversation}
-      onNewChat={handleNewChatStarted}
+      onSelectConversation={handleSelectConversation}     
+      onNewChatStarted={handleNewChatStarted}
     />
 
     {/* Main chat */}

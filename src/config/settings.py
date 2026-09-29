@@ -36,6 +36,11 @@ RERANKER_MODEL = os.getenv(
     "BAAI/bge-reranker-base",
 )
 
+RERANKER_ENABLED = os.getenv(
+    "RERANKER_ENABLED",
+    "true",
+).lower() == "true"
+
 CHUNK_SIZE = 800
 CHUNK_OVERLAP = 100
 
@@ -47,6 +52,8 @@ RELEVANCE_THRESHOLD = float(
 
 RERANK_TOP_N = 2
 RERANK_RELEVANCE_THRESHOLD = 0.005
+
+
 
 EMBED_BATCH_SIZE = int(
     os.getenv("EMBED_BATCH_SIZE", "100")

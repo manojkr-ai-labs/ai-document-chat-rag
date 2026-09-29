@@ -1,4 +1,5 @@
 venv/
+frontend/
 __pycache__/
 .pytest_cache/
 htmlcov/
@@ -11,5 +12,4 @@ htmlcov/
 *.pyo
 *.pyd
 storage/
-documents/
 .env

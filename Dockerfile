@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
+
 # ============================================================
 # Copy requirements
 # ============================================================
@@ -55,10 +56,11 @@ COPY . .
 
 # ============================================================
 # Create non-root user
-# ============================================================
+
+
 RUN addgroup --system app \
     && adduser --system --ingroup app --home /app app \
-    && mkdir -p /app/.cache/huggingface/hub \
+    && mkdir -p /app/.cache/huggingface/hub /app/storage/sqlite /app/storage/chroma \
     && chown -R app:app /app
 
 # ============================================================
@@ -84,4 +86,4 @@ HEALTHCHECK \
 # ============================================================
 # Start application
 # ============================================================
-CMD ["uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn src.api.app:app --host 0.0.0.0 --port 8000"]
