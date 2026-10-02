@@ -1,7 +1,10 @@
 import uuid
 
-tasks = {}
 from src.services.indexing_service import index_single_document
+from src.utils.logger import logger
+
+tasks = {}
+
 
 def create_task():
     """
@@ -42,6 +45,7 @@ def get_task(task_id):
 
     return tasks.get(task_id)
 
+
 def process_document(task_id: str, file_path: str):
     """
     Background worker for indexing a PDF.
@@ -49,8 +53,11 @@ def process_document(task_id: str, file_path: str):
 
     try:
         index_single_document(file_path)
-
         complete_task(task_id)
 
     except Exception:
+        logger.exception(
+            "Failed to process document: %s",
+            file_path,
+        )
         failed_task(task_id)

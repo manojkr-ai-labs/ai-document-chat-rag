@@ -26,22 +26,21 @@ export default function MarkdownRenderer({
               const match = /language-(\w+)/.exec(className || "");
               const code = String(children).replace(/\n$/, "");
 
-              if (match) {
-                return (
-                  <div className="relative">
-                    <CopyCodeButton code={code} />
+            if (match) {
+                  return (
+                    <div className="relative">
+                      <CopyCodeButton code={code} />
 
-                    <SyntaxHighlighter
-                      style={oneDark}
-                      language={match[1]}
-                      PreTag="div"
-                      {...props}
-                    >
-                      {code}
-                    </SyntaxHighlighter>
-                  </div>
-                );
-              }
+                      <SyntaxHighlighter
+                        style={oneDark}
+                        language={match[1]}
+                        PreTag="div"
+                      >
+                        {code}
+                      </SyntaxHighlighter>
+                    </div>
+                  );
+                }
 
               return (
                 <code

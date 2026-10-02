@@ -1,39 +1,72 @@
-from src.retriever.document_retriever import retrieve_documents
+from src.retriever.reranked_retriever import RerankedRetriever
 from src.prompts.rag_prompt import build_prompt
 from src.agents.rag_agent import ask_llm_stream
-from src.services.citation_service import build_citations
 from src.memory.conversation_memory import memory
 from src.utils.logger import logger
+from src.services.citation_service import build_citations
 
 
-def stream_answer(question: str):
+# Initialize once when the application starts/imports.
+# The CrossEncoder model should NOT be loaded for every request.
+retriever = RerankedRetriever()
+
+
+def stream_answer(
+    question: str,
+    conversation: str | None = None,
+):
     """
     Stream an answer from the RAG pipeline.
     """
 
     logger.info("=" * 60)
-    logger.info("Streaming Question Received")
-    logger.info(question)
+    logger.info("RAG request received")
+    use_memory = conversation is None
 
-    # Save user message
-    memory.add_user(question)
+    if use_memory:
+        memory.add_user(question)
+        conversation = memory.get_context()
 
-    # Retrieve documents
-    documents = retrieve_documents(question)
-
-    # Build prompt
-    prompt = build_prompt(
-        context=documents,
-        question=question,
-        conversation=memory.get_context(),
+    # Retrieve candidates → rerank → relevance gate
+    documents = retriever.retrieve(
+        query=question,
     )
 
-    # Stream answer
+    logger.info(
+        f"Final relevant documents: {len(documents)}"
+    )
+
+    # Build citations from the same final documents
+    citations = build_citations(
+        [
+            result.document
+            for result in documents
+        ]
+    )
+
+    logger.info(
+        f"Generated {len(citations)} citations"
+    )
+
+    # Build RAG prompt
+    prompt = build_prompt(
+        context=[
+            result.document
+            for result in documents
+        ],
+        question=question,
+        conversation=conversation,
+    )
+
+    logger.info("RAG prompt built successfully")
+
     complete_answer = ""
 
     for chunk in ask_llm_stream(prompt):
         complete_answer += chunk
         yield chunk
 
-    # Save final AI answer
-    memory.add_ai(complete_answer)
+    if use_memory:
+        memory.add_ai(complete_answer)
+
+    return citations

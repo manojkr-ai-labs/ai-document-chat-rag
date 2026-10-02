@@ -1,22 +1,18 @@
 class DocumentNotFound(Exception):
-    def __init__(self, message: str):
-        super().__init__(message)
+    pass
 
 
 class InvalidPDF(Exception):
-    def __init__(self, message: str):
-        super().__init__(message)
+    pass
 
 
 class VectorDatabaseError(Exception):
-    def __init__(self, message: str):
-        super().__init__(message)
+    pass
 
 
 class LLMError(Exception):
-    def __init__(self, message: str):
-        super().__init__(message)
+    pass
+
+
 class TaskNotFound(Exception):
-    def __init__(self, message: str):
-        super().__init__(message)   
-        
+    pass

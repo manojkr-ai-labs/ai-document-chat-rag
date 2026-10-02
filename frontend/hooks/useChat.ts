@@ -10,9 +10,13 @@ export function useChat() {
   return useMutation<
     ChatResponse,
     Error,
-    string
+    {
+      question: string;
+      conversation_id?: string | null;
+    }
   >({
-    mutationFn: askQuestion,
+    mutationFn: ({ question, conversation_id }) =>
+      askQuestion(question, conversation_id),
 
     onSuccess: (data) => {
       console.log("Answer received:", data);

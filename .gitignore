@@ -18,6 +18,7 @@ ENV/
 # ======================================
 .env
 .env.*
+!.env.example
 
 # ======================================
 # VS Code
@@ -112,3 +113,7 @@ uploads/
 frontend/node_modules/
 frontend/.next/
 frontend/.env.local
+storage/sqlite/chat.db
+
+# Runtime application storage
+storage/

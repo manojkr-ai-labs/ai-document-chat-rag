@@ -13,6 +13,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      BASE_URL: http://127.0.0.1:11434
+      LLM_MODEL: llama3.2:latest
+      EMBEDDING_MODEL: nomic-embed-text:latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -22,16 +27,60 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Start Ollama
+        run: |
+          nohup ollama serve > /tmp/ollama.log 2>&1 &
+          sleep 5
+          curl --fail http://127.0.0.1:11434/api/tags
+
+      - name: Pull Ollama Models
+        run: |
+          ollama pull llama3.2:latest
+          ollama pull nomic-embed-text:latest
+
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
+
+          pip install \
+            torch==2.13.0+cpu \
+            --index-url https://download.pytorch.org/whl/cpu
+
           pip install -r requirements.txt
-          pip install pytest pytest-cov
+          pip install alembic pytest pytest-cov
+
+      - name: Prepare CI Directories
+        run: |
+          mkdir -p storage/sqlite
+          mkdir -p storage/chroma
+          mkdir -p output/reports
+
+      - name: Run Database Migrations
+        run: |
+          alembic upgrade head
+
+      - name: Start API
+        run: |
+          nohup uvicorn src.api.app:app \
+            --host 0.0.0.0 \
+            --port 8000 \
+            > /tmp/api.log 2>&1 &
+
+      - name: Index Documents
+        run: |
+          for i in {1..30}; do
+            if curl --fail http://127.0.0.1:8000/health; then
+              break
+            fi
+            sleep 2
+          done
+
+          curl --fail --request POST http://127.0.0.1:8000/index
 
       - name: Run Tests
         run: |
-          pytest -v
-
-      - name: Generate Coverage
-        run: |
-          pytest --cov=src --cov-report=xml
+          pytest -v --cov=src --cov-report=xml

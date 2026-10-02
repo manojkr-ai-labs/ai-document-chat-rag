@@ -1,10 +1,18 @@
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
+from src.exceptions.custom_exceptions import (
+    DocumentNotFound,
+    InvalidPDF,
+    LLMError,
+    TaskNotFound,
+    VectorDatabaseError,
+)
+
 
 async def document_not_found_handler(
     request: Request,
-    exc,
+    exc: DocumentNotFound,
 ):
     return JSONResponse(
         status_code=404,
@@ -20,7 +28,7 @@ async def document_not_found_handler(
 
 async def invalid_pdf_handler(
     request: Request,
-    exc,
+    exc: InvalidPDF,
 ):
     return JSONResponse(
         status_code=400,
@@ -36,7 +44,7 @@ async def invalid_pdf_handler(
 
 async def vector_database_error_handler(
     request: Request,
-    exc,
+    exc: VectorDatabaseError,
 ):
     return JSONResponse(
         status_code=500,
@@ -52,7 +60,7 @@ async def vector_database_error_handler(
 
 async def llm_error_handler(
     request: Request,
-    exc,
+    exc: LLMError,
 ):
     return JSONResponse(
         status_code=500,
@@ -64,7 +72,12 @@ async def llm_error_handler(
             },
         },
     )
-async def task_not_found_handler(request, exc):
+
+
+async def task_not_found_handler(
+    request: Request,
+    exc: TaskNotFound,
+):
     return JSONResponse(
         status_code=404,
         content={

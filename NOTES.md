@@ -1,3 +1,7 @@
+
+# add Regenerate feature
+
+
 Google Engineer Workflow
 
 They typically evaluate using a matrix like this:
@@ -23,3 +27,49 @@ Ollama OpenAI Claude Gemini
 
 documents/ → PDFs and data for the RAG application.
 docs/ → Documentation for developers.
+
+YOU ARE HERE
+     ↓
+┌──────────────────────────────┐
+│ Stage 4: Working RAG         │
+│                              │
+│ ✅ RAG                       │
+│ ✅ Chroma                    │
+│ ✅ Ollama                    │
+│ ✅ Persistent conversations  │
+│ ✅ Streaming                 │
+└──────────────┬───────────────┘
+               ↓
+        CURRENT TARGET
+               ↓
+┌──────────────────────────────┐
+│ Stage 5: Reliable RAG        │
+│                              │
+│ → Citations                 │
+│ → Threshold                 │
+│ → Reranking                 │
+│ → Grounding                 │
+│ → Evaluation                │
+└──────────────┬───────────────┘
+               ↓
+┌──────────────────────────────┐
+│ Stage 6: Production AI       │
+│                              │
+│ → Observability             │
+│ → Caching                   │
+│ → Security                  │
+│ → Performance               │
+│ → CI/CD                     │
+│ → Cloud deployment          │
+└──────────────┬───────────────┘
+               ↓
+┌──────────────────────────────┐
+│ Stage 7: Advanced AI         │
+│                              │
+│ → Agents                    │
+│ → Tool calling              │
+│ → MCP                       │
+│ → Agentic RAG               │
+│ → LLM evaluation            │
+│ → AI system design          │
+└──────────────────────────────┘

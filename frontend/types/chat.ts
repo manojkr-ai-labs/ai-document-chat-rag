@@ -9,6 +9,7 @@ export interface ChatData {
 } 
 export interface ChatRequest {
   question: string;
+  conversation_id?: string;
 }
 
 export interface ChatAnswer {
@@ -24,6 +25,8 @@ export interface ChatResponse {
   success: boolean;
   message: string;
   data: {
+    conversation_id: string;
+    title?: string;
     answer: string;
     citations: Citation[];
   };

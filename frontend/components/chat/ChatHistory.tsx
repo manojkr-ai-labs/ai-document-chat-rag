@@ -12,12 +12,28 @@ export interface Message {
 interface ChatHistoryProps {
   messages: Message[];
   isStreaming: boolean;
+  isLoading?: boolean;
 }
 
 export default function ChatHistory({
   messages,
-  isStreaming
+  isStreaming,
+  isLoading = false,
 }: ChatHistoryProps) {
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border border-dashed p-10 text-center text-gray-500">
+        <h3 className="text-lg font-semibold">
+          Loading conversation...
+        </h3>
+
+        <p className="mt-2 text-sm">
+          Please wait while we load this chat.
+        </p>
+      </div>
+    );
+  }
+
   if (messages.length === 0) {
     return (
       <div className="rounded-xl border border-dashed p-10 text-center text-gray-500">
