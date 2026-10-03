@@ -49,86 +49,94 @@ class ChatStreamService:
         return conversation.id
 
     def stream(
-        self,
-        question: str,
-        conversation_id: str,
+    self,
+    question: str,
+    conversation_id: str,
     ) -> Generator[str, None, list[dict]]:
-        """
-        Stream the RAG response and persist messages.
-        """
+     """
+     Stream the RAG response and persist messages.
+     """
 
-        conversation = self.conversation_repo.get(
-            conversation_id
+     conversation = self.conversation_repo.get(
+        conversation_id
+     )
+
+     if conversation is None:
+        raise ValueError("Conversation not found")
+
+     # Rename placeholder conversation title
+     if conversation.title in PLACEHOLDER_TITLES:
+        conversation = self.conversation_repo.rename(
+            conversation,
+            title_from_question(question),
         )
 
-        if conversation is None:
-            raise ValueError("Conversation not found")
+     # --------------------------------------------------
+     # Save user message
+     # --------------------------------------------------
 
-        # Rename placeholder conversation title
-        if conversation.title in PLACEHOLDER_TITLES:
-            conversation = self.conversation_repo.rename(
-                conversation,
-                title_from_question(question),
-            )
+     user_message = Message(
+        conversation_id=conversation.id,
+        role="user",
+        content=question,
+        citations=None,
+     )
 
-        # --------------------------------------------------
-        # Save user message
-        # --------------------------------------------------
+     self.message_repo.save(user_message)
 
-        user_message = Message(
-            conversation_id=conversation.id,
-            role="user",
-            content=question,
-            citations=None,
-        )
+    # --------------------------------------------------
+    # Build persistent conversation history
+    # --------------------------------------------------
 
-        self.message_repo.save(user_message)
+     messages = self.message_repo.list_by_conversation(
+        conversation.id
+     )
 
-        # --------------------------------------------------
-        # Build persistent conversation history
-        # --------------------------------------------------
+     conversation_history = "\n".join(
+        f"{message.role.capitalize()}: {message.content}"
+        for message in messages
+     )
 
-        messages = self.message_repo.list_by_conversation(
-            conversation.id
-        )
+    # --------------------------------------------------
+    # Generate assistant response
+    # --------------------------------------------------
 
-        conversation_history = "\n".join(
-            f"{message.role.capitalize()}: {message.content}"
-            for message in messages
-        )
+     complete_answer = ""
 
-        # --------------------------------------------------
-        # Stream assistant response
-        # --------------------------------------------------
+     stream = stream_answer(
+        question,
+        conversation=conversation_history,
+     )
 
-        complete_answer = ""
+     chunks: list[str] = []
+     citations: list[dict] = []
 
-        stream = stream_answer(
-            question,
-            conversation=conversation_history
-            )
+     while True:
+        try:
+            chunk = next(stream)
+            chunks.append(chunk)
+            complete_answer += chunk
 
-        while True:
-           try:
-             chunk = next(stream)
- 
-             complete_answer += chunk
+        except StopIteration as exc:
+            citations = exc.value or []
+            break
 
-             yield chunk
+    # --------------------------------------------------
+    # Persist assistant response BEFORE yielding
+    # --------------------------------------------------
 
-           except StopIteration as exc:
-             citations = exc.value
-             break
+     assistant_message = Message(
+        conversation_id=conversation.id,
+        role="assistant",
+        content=complete_answer,
+        citations=citations,
+     )
 
-        # --------------------------------------------------
-        # Save final assistant message
-        # --------------------------------------------------
+     self.message_repo.save(assistant_message)
 
-        assistant_message = Message(
-            conversation_id=conversation.id,
-            role="assistant",
-            content=complete_answer,
-            citations=citations,
-        )
+    # --------------------------------------------------
+    # Send response to client
+    # --------------------------------------------------
 
-        self.message_repo.save(assistant_message)
+     for chunk in chunks:
+        yield chunk

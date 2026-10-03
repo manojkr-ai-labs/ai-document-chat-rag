@@ -34,6 +34,9 @@ class CrossEncoderReranker:
 
         scores = self.model.predict(pairs)
 
+        print(f"RERANKER SCORES=>>>>>>>>>>>>: {[float(score) for score in scores]}")
+
+
         ranked = sorted(
             zip(candidates, scores),
             key=lambda item: float(item[1]),
