@@ -6,24 +6,27 @@ import {
   MessageSquare,
   HeartPulse,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import QuickAction from "./QuickAction";
 
 export default function QuickActions() {
+  const router = useRouter();
+
   const handleUpload = () => {
-    console.log("Upload clicked");
+    router.push("/upload");
   };
 
   const handleIndex = () => {
-    console.log("Index clicked");
+    router.push("/documents");
   };
 
   const handleChat = () => {
-    console.log("Chat clicked");
+    router.push("/chat");
   };
 
   const handleHealth = () => {
-    console.log("Health clicked");
+    router.push("/health");
   };
 
   return (

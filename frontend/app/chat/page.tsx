@@ -289,18 +289,20 @@ export default function ChatPage() {
   // UI
   // ==========================================================
 return (
-  <div className="flex h-screen">
-    {/* Sidebar */}
+  <div className="flex h-full min-h-0">
+    {/* Conversation Sidebar */}
     <ConversationSidebar
       selectedConversationId={selectedConversationId}
-      onSelectConversation={handleSelectConversation}     
+      onSelectConversation={handleSelectConversation}
       onNewChatStarted={handleNewChatStarted}
     />
 
-    {/* Main chat */}
-    <div className="flex flex-1 flex-col">
-      <div className="mx-auto flex h-[calc(100vh-100px)] max-w-5xl flex-col gap-6 p-6">
-        <div>
+    {/* Main Chat */}
+    <div className="flex min-w-0 min-h-0 flex-1 flex-col">
+      <div className="mx-auto flex h-full min-h-0 w-full max-w-5xl flex-col gap-6 p-6">
+
+        {/* Header */}
+        <div className="shrink-0">
           <h1 className="text-3xl font-bold">
             AI Document Chat
           </h1>
@@ -310,7 +312,8 @@ return (
           </p>
         </div>
 
-        <div className="flex-1 overflow-y-auto rounded-xl border bg-slate-50 p-6">
+        {/* Messages */}
+        <div className="min-h-0 flex-1 overflow-y-auto rounded-xl border bg-slate-50 p-6">
           {isConversationError && selectedConversationId ? (
             <div className="rounded-xl border border-dashed p-10 text-center text-red-500">
               <h3 className="text-lg font-semibold">
@@ -332,16 +335,23 @@ return (
           <div ref={messagesEndRef} />
         </div>
 
-        {isStreaming && <ThinkingIndicator />}
+        {/* Thinking */}
+        {isStreaming && (
+          <div className="shrink-0">
+            <ThinkingIndicator />
+          </div>
+        )}
 
-        <ChatInput
-          onSend={handleSend}
-          onStop={() => {
-            abortControllerRef.current?.abort();
-          }}
-          isStreaming={isStreaming}
-          disabled={isLoadingConversation}
-        />
+        {/* Input */}
+        <div className="shrink-0">
+          <ChatInput
+            onSend={handleSend}
+            onStop={handleStop}
+            isStreaming={isStreaming}
+            disabled={isLoadingConversation}
+          />
+        </div>
+
       </div>
     </div>
   </div>
