@@ -25,7 +25,6 @@ def ask_llm(prompt: str) -> str:
 
     return response.content
 
-
 def ask_llm_stream(prompt: str) -> Generator[str, None, None]:
     logger.info("=" * 60)
     logger.info("Streaming response from LLM...")
@@ -41,8 +40,19 @@ def ask_llm_stream(prompt: str) -> Generator[str, None, None]:
             chunk_count,
         )
 
-        if chunk.content:
-            yield chunk.content
+        content = chunk.content
+
+        if isinstance(content, str):
+            if content:
+                yield content
+
+        elif isinstance(content, list):
+            for item in content:
+                if isinstance(item, dict):
+                    text = item.get("text")
+
+                    if text:
+                        yield text
 
     logger.info(
         "LLM STREAM COMPLETE. Total chunks: %s",
